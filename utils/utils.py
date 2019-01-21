@@ -12,7 +12,7 @@ def timer(title):
 
 
 def submission(config, pred):
-    df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY])
+    df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=config.NROWS)
     df[config.LABEL_COL_NAME] = pred
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
