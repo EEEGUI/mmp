@@ -72,12 +72,18 @@ def feature_engineer():
     numerical_columns = [c for c, v in mmp_config.DTYPES.items() if v in numerics]
     categorical_columns = [c for c, v in mmp_config.DTYPES.items() if v not in numerics]
     retained_columns = numerical_columns + categorical_columns
+    print('Reading train.csv...')
     df_train = pd.read_csv(mmp_config.TRAIN_PATH, nrows=mmp_config.NROWS, dtype=mmp_config.DTYPES, usecols=retained_columns)
     retained_columns.remove('HasDetections')
+    print('Reading test.csv...')
     df_test = pd.read_csv(mmp_config.TEST_PATH, nrows=mmp_config.NROWS, dtype=mmp_config.DTYPES, usecols=retained_columns)
 
     dataset = MMPDataSet(df_train, df_test, mmp_config)
 
+    del df_train
+    del df_test
+
+    print('Label encoding...')
     dataset.frequent_encoding()
     dataset.category_encoding()
     dataset.df_all = dataset.drop_cols(dataset.df_all, ['MachineIdentifier', 'ProductName', 'Census_DeviceFamily', 'Census_ProcessorClass'])
