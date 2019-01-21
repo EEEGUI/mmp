@@ -80,7 +80,7 @@ def feature_engineer():
 
     dataset.frequent_encoding()
     dataset.category_encoding()
-    dataset.df_all = dataset.drop_cols(dataset.df_all, ['MachineIdentifier', 'ProductName', 'Census_DeviceFamily'])
+    dataset.df_all = dataset.drop_cols(dataset.df_all, ['MachineIdentifier', 'ProductName', 'Census_DeviceFamily', 'Census_ProcessorClass'])
 
     dataset.get_df_train().to_csv(mmp_config.TRAIN_FEATURE_PATH, index=False)
     dataset.get_df_test().to_csv(mmp_config.TEST_FEATURE_PATH, index=False)
