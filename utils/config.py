@@ -8,6 +8,7 @@ class Config(object):
     TRAIN_FEATURE_PATH = 'data/input/train_feature.csv'
     TEST_FEATURE_PATH = 'data/input/test_feature.csv'
     LABEL_PATH = 'data/input/label.csv'
+    OUTPUT = 'data/output'
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
