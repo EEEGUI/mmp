@@ -1,7 +1,6 @@
 from utils.config import Config
 from utils.model import LGBM
-from utils.utils import timer
-from utils.utils import submission
+from utils.utils import *
 import pandas as pd
 
 
@@ -11,6 +10,9 @@ def main():
     train_feature = pd.read_csv(config.TRAIN_FEATURE_PATH)
     test_feature = pd.read_csv(config.TEST_FEATURE_PATH)
     label = pd.read_csv(config.LABEL_PATH)
+
+    train_feature = drop_cols(train_feature, ['PuaMode'])
+    test_feature = drop_cols(test_feature, ['PuaMode'])
 
     lgbm = LGBM(config, train_feature, label, test_feature)
     submission(config, lgbm.train())

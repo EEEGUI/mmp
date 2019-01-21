@@ -19,3 +19,12 @@ def submission(config, pred):
     df.to_csv(os.path.join(config.OUTPUT, 'submission.csv'), index=False)
 
 
+def drop_cols(df, list_cols):
+    """
+    del list_cols from df
+    :param df:
+    :param list_cols: list, cols to delete
+    :return: df without list_cols
+    """
+    return df.drop(labels=list_cols, axis=1)
+
