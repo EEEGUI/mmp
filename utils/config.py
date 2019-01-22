@@ -8,9 +8,9 @@ class Config(object):
     TRAIN_H5_PATH = 'data/raw/train.h5'
     TEST_H5_PATH = 'data/raw/test.h5'
 
-    TRAIN_FEATURE_PATH = 'data/input/train_feature.csv'
-    TEST_FEATURE_PATH = 'data/input/test_feature.csv'
-    LABEL_PATH = 'data/input/label.csv'
+    TRAIN_FEATURE_PATH = 'data/input/train_feature.h5'
+    TEST_FEATURE_PATH = 'data/input/test_feature.h5'
+    LABEL_PATH = 'data/input/label.h5'
     OUTPUT = 'data/output'
 
     FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
