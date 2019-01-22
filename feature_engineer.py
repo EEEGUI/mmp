@@ -70,9 +70,11 @@ def feature_engineer():
     dataset.category_encoding()
     dataset.drop_key()
 
-    dataset.get_df_train().to_csv(mmp_config.TRAIN_FEATURE_PATH, index=False)
-    dataset.get_df_test().to_csv(mmp_config.TEST_FEATURE_PATH, index=False)
-    dataset.get_label().to_csv(mmp_config.LABEL_PATH, index=False)
+    # dataset.get_df_train().to_csv(mmp_config.TRAIN_FEATURE_PATH, index=False)
+    # dataset.get_df_test().to_csv(mmp_config.TEST_FEATURE_PATH, index=False)
+    # dataset.get_label().to_csv(mmp_config.LABEL_PATH, index=False)
+
+    return dataset.get_df_train(), dataset.get_df_test(), dataset.get_label()
 
 
 if __name__ == '__main__':
