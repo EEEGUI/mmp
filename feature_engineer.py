@@ -10,28 +10,11 @@ from sklearn.preprocessing import LabelEncoder
 class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
-        self.true_numerical_columns = [
-                'Census_ProcessorCoreCount',
-                'Census_PrimaryDiskTotalCapacity',
-                'Census_SystemVolumeTotalCapacity',
-                'Census_TotalPhysicalRAM',
-                'Census_InternalPrimaryDiagonalDisplaySizeInInches',
-                'Census_InternalPrimaryDisplayResolutionHorizontal',
-                'Census_InternalPrimaryDisplayResolutionVertical',
-                'Census_InternalBatteryNumberOfCharges'
-            ]
-        self.frequency_encoded_variables = [
-                                            'Census_OEMModelIdentifier',
-                                            'CityIdentifier',
-                                            'Census_FirmwareVersionIdentifier',
-                                            'AvSigVersion',
-                                            'Census_ProcessorModelIdentifier',
-                                            'Census_OEMNameIdentifier',
-                                            'DefaultBrowsersIdentifier'
-                                            ]
+        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
+        self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
         # self.binary_variables = [c for c in self.df_all.columns if self.df_all[c].nunique() == 2]
         self.label_encoded_variables = [c for c in self.df_all.columns
-                                        if (c not in self.true_numerical_columns) &
+                                        if (c not in self.true_numerical_variables) &
                                         (c not in self.frequency_encoded_variables) &
                                         (c != self.config.KEY)]
 
