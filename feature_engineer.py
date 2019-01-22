@@ -104,16 +104,20 @@ def convert_format():
 def feature_report():
     mmp_config = config.Config()
     print('Reading train.h5...')
-    df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
+    with timer('Reading train.h5'):
+        df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
 
     print('Reading test.h5...')
-    df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
+    with timer('Reading test.h5'):
+        df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
-    train_report = pdf.ProfileReport(df_train)
-    train_report.to_file(mmp_config.TRAIN_REPORT_PATH)
+    with timer('Train report'):
+        train_report = pdf.ProfileReport(df_train)
+        train_report.to_file(mmp_config.TRAIN_REPORT_PATH)
 
-    test_report = pdf.ProfileReport(df_test)
-    test_report.to_file(mmp_config.TRAIN_REPORT_PATH)
+    with timer('Test report'):
+        test_report = pdf.ProfileReport(df_test)
+        test_report.to_file(mmp_config.TEST_REPORT_PATH)
 
 
 if __name__ == '__main__':
