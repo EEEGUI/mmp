@@ -4,6 +4,7 @@ from sklearn.model_selection import KFold
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
+from scipy.stats import rankdata
 
 
 class LGBM:
@@ -38,7 +39,12 @@ class LGBM:
 
             feature_importance_values += gbm.feature_importance() / k_fold.n_splits
 
-            test_predictions += gbm.predict(self.test_features, num_iteration=gbm.best_iteration) / k_fold.n_splits
+            # test_predictions += gbm.predict(self.test_features, num_iteration=gbm.best_iteration) / k_fold.n_splits
+            test_predictions = np.add(test_predictions,
+                                      rankdata(gbm.predict(self.test_features, num_iteration=gbm.best_iteration))
+                                      / test_predictions.shape[0])
+
+        test_predictions /= k_fold.n_splits
 
             # valid_scores.append(gbm.best_score['valid']['auc'])
             # train_scores.append(gbm.best_score['train']['auc'])

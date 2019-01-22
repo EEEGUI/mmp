@@ -11,12 +11,15 @@ def timer(title):
     print("{} - done in {:.1f}mins".format(title, (time.time() - t0)/60))
 
 
-def submission(config, pred):
+def submission(config, pred, is_compres):
     df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=config.NROWS)
     df[config.LABEL_COL_NAME] = pred
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
-    df.to_csv(os.path.join(config.OUTPUT, 'submission.csv.zip'), index=False, compression='zip')
+    if is_compres:
+        df.to_csv(os.path.join(config.OUTPUT, 'submission.csv.zip'), index=False, compression='zip')
+    else:
+        df.to_csv(os.path.join(config.OUTPUT, 'submission.csv'), index=False)
 
 
 def drop_cols(df, list_cols):
