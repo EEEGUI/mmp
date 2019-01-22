@@ -3,8 +3,10 @@ from utils import dataset
 from utils.utils import *
 import numpy as np
 from tqdm import tqdm
-import matplotlib.pyplot as plt
 import pandas_profiling as pdf
+import warnings
+
+warnings.filterwarnings('ignore')
 
 
 class MMPDataSet(dataset.DataSet):
