@@ -17,6 +17,7 @@ class DataSet(object):
         df_train = self.drop_cols(df_train, [config.LABEL_COL_NAME])
 
         self.df_all = pd.concat([df_train, df_test], ignore_index=True)
+        self.config = config
 
     def merge_data(self, on_key, df_other):
         """
@@ -71,8 +72,8 @@ class DataSet(object):
         :return:
         """
         le = LabelEncoder()
-        le.fit(self.df_all.loc[cols_to_encode])
-        self.df_all.loc[cols_to_encode] = le.transform(self.df_all.loc[cols_to_encode])
+        self.df_all.loc[:, cols_to_encode] = \
+            self.df_all.loc[:, cols_to_encode].apply(lambda x: le.fit_transform(x.astype(str)))
 
     def process_datetime(self, cols_of_datetime):
         """

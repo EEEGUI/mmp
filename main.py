@@ -11,9 +11,6 @@ def main():
     test_feature = pd.read_csv(config.TEST_FEATURE_PATH)
     label = pd.read_csv(config.LABEL_PATH)
 
-    train_feature = drop_cols(train_feature, ['PuaMode'])
-    test_feature = drop_cols(test_feature, ['PuaMode'])
-
     lgbm = LGBM(config, train_feature, label, test_feature)
     submission(config, lgbm.train())
 
