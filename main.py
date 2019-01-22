@@ -17,7 +17,7 @@ def train(train_feature, test_feature, label, load_data=False):
     config.CATEGORY_VARIABLES = [c for c in train_feature.columns if c not in config.TRUE_NUMERICAL_COLUMNS]
 
     lgbm = LGBM(config, train_feature, label, test_feature)
-    submission(config, lgbm.train())
+    submission(config, lgbm.train(), True)
 
 
 def main():

@@ -51,7 +51,7 @@ def feature_engineer(save_feature = False):
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
 
     print('Reading test.h5...')
-    df_test = pd.read_csv(mmp_config.TEST_H5_PATH, key='data')
+    df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
     dataset = MMPDataSet(df_train, df_test, mmp_config)
 
