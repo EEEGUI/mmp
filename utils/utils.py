@@ -16,7 +16,7 @@ def submission(config, pred):
     df[config.LABEL_COL_NAME] = pred
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
-    df.to_csv(os.path.join(config.OUTPUT, 'submission.csv'), index=False)
+    df.to_csv(os.path.join(config.OUTPUT, 'submission.csv.zip'), index=False, compression='zip')
 
 
 def drop_cols(df, list_cols):
