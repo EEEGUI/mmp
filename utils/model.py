@@ -14,13 +14,14 @@ class LGBM:
         train_x, val_x, train_y, val_y = train_test_split(self.train_features,
                                                           self.train_labels,
                                                           test_size=EVAL_SIZE,
-                                                          shuffle=False)
+                                                          random_state=712)
         lgb_trian = lgb.Dataset(train_x, train_y)
         lgb_eval = lgb.Dataset(val_x, val_y)
         gbm = lgb.train(self.config.PARAM, lgb_trian,
                         num_boost_round=self.config.NUM_BOOST_ROUND,
                         valid_sets=lgb_eval,
-                        early_stopping_rounds=self.config.EARLY_STOP_ROUND)
+                        early_stopping_rounds=self.config.EARLY_STOP_ROUND,
+                        categorical_feature=self.config.CATEGORY_VARIABLES)
 
         print('Saving model...')
         # save model to file

@@ -111,6 +111,14 @@ class Config(object):
         'Census_InternalBatteryNumberOfCharges'
     ]
 
+    FREQUENT_ENCODED_COLUMNS = ['Census_OEMModelIdentifier',
+                                'CityIdentifier',
+                                'Census_FirmwareVersionIdentifier',
+                                'AvSigVersion',
+                                'Census_ProcessorModelIdentifier',
+                                'Census_OEMNameIdentifier',
+                                'DefaultBrowsersIdentifier']
+
 
     ## Model ##
     PARAM = {'num_leaves': 60,
