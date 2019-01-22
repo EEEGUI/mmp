@@ -1,5 +1,9 @@
+import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import train_test_split
+from sklearn.model_selection import KFold
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
 
 
 class LGBM:
@@ -8,28 +12,51 @@ class LGBM:
         self.train_labels = train_labels
         self.test_features = test_features
         self.config = config
+        self.feature_importance = None
 
     def train(self, **kwargs):
-        EVAL_SIZE = 0.3
-        train_x, val_x, train_y, val_y = train_test_split(self.train_features,
-                                                          self.train_labels,
-                                                          test_size=EVAL_SIZE,
-                                                          random_state=712)
-        lgb_trian = lgb.Dataset(train_x, train_y)
-        lgb_eval = lgb.Dataset(val_x, val_y)
-        gbm = lgb.train(self.config.PARAM, lgb_trian,
-                        num_boost_round=self.config.NUM_BOOST_ROUND,
-                        valid_sets=lgb_eval,
-                        early_stopping_rounds=self.config.EARLY_STOP_ROUND,
-                        categorical_feature=self.config.CATEGORY_VARIABLES)
+        k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
+        # valid_scores = []
+        # train_scores = []
 
+        feature_importance_values = np.zeros(len(self.train_features.columns))
+        test_predictions = np.zeros(self.test_features.shape[0])
+
+        for train_indices, valid_indices in k_fold.split(self.train_features):
+
+            train_x, train_y = self.train_features.iloc[train_indices, :], self.train_labels.iloc[train_indices, :]
+
+            valid_x, valid_y = self.train_features.iloc[valid_indices, :], self.train_labels.iloc[valid_indices, :]
+
+            lgb_trian = lgb.Dataset(train_x, train_y)
+            lgb_eval = lgb.Dataset(valid_x, valid_y)
+            gbm = lgb.train(self.config.PARAM, lgb_trian,
+                            num_boost_round=self.config.NUM_BOOST_ROUND,
+                            valid_sets=lgb_eval,
+                            early_stopping_rounds=self.config.EARLY_STOP_ROUND,
+                            categorical_feature=self.config.CATEGORY_VARIABLES)
+
+            feature_importance_values += gbm.feature_importance() / k_fold.n_splits
+
+            test_predictions += gbm.predict(self.test_features, num_iteration=gbm.best_iteration) / k_fold.n_splits
+
+            # valid_scores.append(gbm.best_score['valid']['auc'])
+            # train_scores.append(gbm.best_score['train']['auc'])
+
+        self.feature_importance = pd.DataFrame({'feature': self.train_features.columns,
+                                                'importance': feature_importance_values})
+
+        self.plot_feature_importance()
         print('Saving model...')
         # save model to file
         gbm.save_model(self.config.MODEL_SAVING_PATH)
+        return test_predictions
 
-        print('Starting predicting...')
-        # predict
-        y_pred = gbm.predict(self.test_features, num_iteration=gbm.best_iteration)
-        print('finish!')
-        return y_pred
-    #
+    def plot_feature_importance(self):
+        plt.figure(figsize=(14, 25))
+        sns.barplot(x="importance",
+                    y="feature",
+                    data=self.feature_importance.sort_values(by="importance", ascending=False))
+        plt.title('LightGBM Features (avg over folds)')
+        plt.tight_layout()
+        plt.savefig(self.config.FEATURE_IMPORTANCE_FIG)
