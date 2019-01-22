@@ -4,7 +4,6 @@ from utils import dataset
 from utils.utils import timer
 import numpy as np
 from tqdm import tqdm
-from sklearn.preprocessing import LabelEncoder
 
 
 class MMPDataSet(dataset.DataSet):
@@ -12,7 +11,6 @@ class MMPDataSet(dataset.DataSet):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
         self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
         self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
-        # self.binary_variables = [c for c in self.df_all.columns if self.df_all[c].nunique() == 2]
         self.label_encoded_variables = [c for c in self.df_all.columns
                                         if (c not in self.true_numerical_variables) &
                                         (c not in self.frequency_encoded_variables) &

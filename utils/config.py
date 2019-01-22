@@ -10,6 +10,8 @@ class Config(object):
     LABEL_PATH = 'data/input/label.csv'
     OUTPUT = 'data/output'
 
+    FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
+
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
     NROWS = None
@@ -135,7 +137,7 @@ class Config(object):
              "lambda_l1": 0.1,
              "random_state": 133,
              "verbosity": -1}
-
+    N_FOLDS = 5
     NUM_BOOST_ROUND = 10000
     EARLY_STOP_ROUND = 100
     MODEL_SAVING_PATH = 'assets/model.pkl'
