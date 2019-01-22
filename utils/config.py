@@ -13,7 +13,8 @@ class Config(object):
     LABEL_PATH = 'data/input/label.h5'
     OUTPUT = 'data/output'
 
-    REPORT_PATH = 'assets/report.html'
+    TRAIN_REPORT_PATH = 'assets/train_report.html'
+    TEST_REPORT_PATH = 'assets/test_report.html'
 
     FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
 

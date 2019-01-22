@@ -45,22 +45,11 @@ class MMPDataSet(dataset.DataSet):
 
 def feature_engineer(save_feature = False):
     mmp_config = config.Config()
+    print('Reading train.h5...')
+    df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
 
-    numerics = ['int8', 'int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-    numerical_columns = [c for c, v in mmp_config.DTYPES.items() if v in numerics]
-    categorical_columns = [c for c, v in mmp_config.DTYPES.items() if v not in numerics]
-    retained_columns = numerical_columns + categorical_columns
-    print('Reading train.csv...')
-    df_train = pd.read_csv(mmp_config.TRAIN_PATH,
-                           nrows=mmp_config.NROWS,
-                           dtype=mmp_config.DTYPES,
-                           usecols=retained_columns)
-    retained_columns.remove('HasDetections')
-    print('Reading test.csv...')
-    df_test = pd.read_csv(mmp_config.TEST_PATH,
-                          nrows=mmp_config.NROWS,
-                          dtype=mmp_config.DTYPES,
-                          usecols=retained_columns)
+    print('Reading test.h5...')
+    df_test = pd.read_csv(mmp_config.TEST_H5_PATH, key='data')
 
     dataset = MMPDataSet(df_train, df_test, mmp_config)
 
@@ -114,12 +103,17 @@ def convert_format():
 
 def feature_report():
     mmp_config = config.Config()
-    print('Reading train.csv...')
-    df_train = pd.read_csv(mmp_config.TRAIN_PATH,
-                           nrows=mmp_config.NROWS,
-                           dtype=mmp_config.DTYPES)
-    report = pdf.ProfileReport(df_train)
-    report.to_file(mmp_config.REPORT_PATH)
+    print('Reading train.h5...')
+    df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
+
+    print('Reading test.h5...')
+    df_test = pd.read_csv(mmp_config.TEST_H5_PATH, key='data')
+
+    train_report = pdf.ProfileReport(df_train)
+    train_report.to_file(mmp_config.TRAIN_REPORT_PATH)
+
+    test_report = pdf.ProfileReport(df_test)
+    test_report.to_file(mmp_config.TRAIN_REPORT_PATH)
 
 
 if __name__ == '__main__':
