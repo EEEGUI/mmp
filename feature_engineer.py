@@ -107,7 +107,7 @@ def feature_report():
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
 
     print('Reading test.h5...')
-    df_test = pd.read_csv(mmp_config.TEST_H5_PATH, key='data')
+    df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
     train_report = pdf.ProfileReport(df_train)
     train_report.to_file(mmp_config.TRAIN_REPORT_PATH)
