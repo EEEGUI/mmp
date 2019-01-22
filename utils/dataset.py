@@ -120,6 +120,5 @@ class DataSet(object):
         :return:
         """
         return pd.DataFrame({self.label_name: self.label})
-#
 
 

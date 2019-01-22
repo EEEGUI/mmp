@@ -3,11 +3,12 @@ import time
 import pandas as pd
 import os
 
+
 @contextmanager
 def timer(title):
     t0 = time.time()
     yield
-    print("{} - done in {:.4f}mins".format(title, (time.time() - t0)))
+    print("{} - done in {:.1f}mins".format(title, (time.time() - t0)/60))
 
 
 def submission(config, pred):
@@ -29,9 +30,6 @@ def drop_cols(df, list_cols):
 
 
 def save_as_h5(df, path):
-    # h5 = pd.HDFStore(path, 'w')
-    # h5['data'] = df
-    # h5.close()
     df.to_hdf(path, key='data', format='table')
 
 

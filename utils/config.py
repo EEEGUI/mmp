@@ -13,6 +13,8 @@ class Config(object):
     LABEL_PATH = 'data/input/label.h5'
     OUTPUT = 'data/output'
 
+    REPORT_PATH = 'assets/report.html'
+
     FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
 
     ##  DataSet ##
