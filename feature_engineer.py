@@ -3,6 +3,8 @@ from utils import dataset
 from utils.utils import *
 import numpy as np
 from tqdm import tqdm
+import matplotlib.pyplot as plt
+import pandas_profiling as pdf
 
 
 class MMPDataSet(dataset.DataSet):
@@ -110,8 +112,15 @@ def convert_format():
         df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
 
-if __name__ == '__main__':
-    # with timer('Feature Engineer'):
-    #     feature_engineer()
+def feature_report():
+    mmp_config = config.Config()
+    print('Reading train.csv...')
+    df_train = pd.read_csv(mmp_config.TRAIN_PATH,
+                           nrows=mmp_config.NROWS,
+                           dtype=mmp_config.DTYPES)
+    report = pdf.ProfileReport(df_train)
+    report.to_file(mmp_config.REPORT_PATH)
 
-    convert_format()
+
+if __name__ == '__main__':
+    feature_report()
