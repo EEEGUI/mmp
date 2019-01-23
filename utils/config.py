@@ -20,7 +20,7 @@ class Config(object):
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
-    NROWS = None
+    NROWS = 10000
     KEY = 'MachineIdentifier'
     DTYPES = {
                 'MachineIdentifier':                                    'category',
@@ -122,13 +122,27 @@ class Config(object):
         'Census_InternalBatteryNumberOfCharges'
     ]
 
-    FREQUENT_ENCODED_COLUMNS = ['Census_OEMModelIdentifier',
-                                'CityIdentifier',
-                                'Census_FirmwareVersionIdentifier',
+    FREQUENT_ENCODED_COLUMNS = ['AppVersion', 'AVProductStatesIdentifier',
                                 'AvSigVersion',
-                                'Census_ProcessorModelIdentifier',
+                                'Census_ChassisTypeName',
+                                'Census_FirmwareManufacturerIdentifier',
+                                'Census_FirmwareVersionIdentifier',
+                                'Census_InternalBatteryType',
+                                'Census_OEMModelIdentifier',
                                 'Census_OEMNameIdentifier',
-                                'DefaultBrowsersIdentifier']
+                                'Census_OSBuildRevision',
+                                'Census_OSVersion',
+                                'Census_ProcessorModelIdentifier',
+                                'CityIdentifier',
+                                'CountryIdentifier',
+                                'DefaultBrowsersIdentifier',
+                                'EngineVersion',
+                                'GeoNameIdentifier',
+                                'IeVerIdentifier',
+                                'LocaleEnglishNameIdentifier',
+                                'OsBuildLab',
+                                'OsBuild',
+                                'OsVer']
 
     COLUMNS_TO_DROP = ['AutoSampleOptIn', 'Census_IsFlightingInternal', 'Census_ProcessorClass']
 
