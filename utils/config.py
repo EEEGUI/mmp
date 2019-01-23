@@ -20,7 +20,7 @@ class Config(object):
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
-    NROWS = 10000
+    NROWS = None
     KEY = 'MachineIdentifier'
     DTYPES = {
                 'MachineIdentifier':                                    'category',
