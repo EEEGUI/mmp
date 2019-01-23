@@ -74,8 +74,8 @@ def feature_engineer(save_feature=False):
     del df_train
     del df_test
 
-    print('Split feature...')
-    dataset.split_feature()
+    # print('Split feature...')
+    # dataset.split_feature()
 
     print('Label encoding...')
     dataset.category_encoding()
