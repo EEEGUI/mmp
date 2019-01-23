@@ -132,7 +132,7 @@ class Config(object):
 
     COLUMNS_TO_DROP = ['AutoSampleOptIn', 'Census_IsFlightingInternal', 'Census_ProcessorClass']
 
-    COLUMNS_TO_SPLIT = ['AvSigVersion', 'AppVersion', 'Census_OSVersion', 'EngineVersion']
+    COLUMNS_TO_SPLIT = ['AvSigVersion', 'AppVersion', 'Census_OSVersion', 'EngineVersion', 'OsVer']
     ## Model ##
     PARAM = {'num_leaves': 60,
              'min_data_in_leaf': 60,
