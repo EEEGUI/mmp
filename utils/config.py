@@ -108,6 +108,9 @@ class Config(object):
                 'HasDetections':                                        'int8'
             }
 
+
+    ## Feature Engineer ##
+
     TRUE_NUMERICAL_COLUMNS = [
         'Census_ProcessorCoreCount',
         'Census_PrimaryDiskTotalCapacity',
@@ -127,7 +130,9 @@ class Config(object):
                                 'Census_OEMNameIdentifier',
                                 'DefaultBrowsersIdentifier']
 
+    COLUMNS_TO_DROP = ['AutoSampleOptIn', 'Census_IsFlightingInternal', 'Census_ProcessorClass']
 
+    COLUMNS_TO_SPLIT = ['AvSigVersion', 'AppVersion', 'Census_OSVersion', 'EngineVersion']
     ## Model ##
     PARAM = {'num_leaves': 60,
              'min_data_in_leaf': 60,

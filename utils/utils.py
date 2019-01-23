@@ -2,6 +2,7 @@ from contextlib import contextmanager
 import time
 import pandas as pd
 import os
+from datetime import datetime
 
 
 @contextmanager
@@ -12,14 +13,15 @@ def timer(title):
 
 
 def submission(config, pred, is_compres):
+    now = datetime.now().strftime("%Y%m%d-%H%M%S")
     df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=config.NROWS)
     df[config.LABEL_COL_NAME] = pred
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
     if is_compres:
-        df.to_csv(os.path.join(config.OUTPUT, 'submission.csv.zip'), index=False, compression='zip')
+        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv.zip' % now), index=False, compression='zip')
     else:
-        df.to_csv(os.path.join(config.OUTPUT, 'submission.csv'), index=False)
+        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv' % now), index=False)
 
 
 def drop_cols(df, list_cols):
