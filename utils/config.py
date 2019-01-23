@@ -149,6 +149,7 @@ class Config(object):
 
     COLUMNS_TO_SPLIT = ['AvSigVersion', 'AppVersion', 'Census_OSVersion', 'EngineVersion', 'OsVer']
     ## Model ##
+
     PARAM = {'num_leaves': 60,
              'min_data_in_leaf': 60,
              'objective': 'binary',
@@ -163,6 +164,25 @@ class Config(object):
              "lambda_l1": 0.1,
              "random_state": 133,
              "verbosity": -1}
+
+    """
+    PARAM = {
+                'boosting_type': 'gbdt',
+                'objective': 'binary',
+                'metric': 'auc',
+                'nthread': 4,
+                'learning_rate': 0.05,
+                'max_depth': 5,
+                'num_leaves': 40,
+                'sub_feature': 0.9,
+                'sub_row': 0.9,
+                'bagging_freq': 1,
+                'lambda_l1': 0.1,
+                'lambda_l2': 0.1,
+                'random_state': 133,
+                'verbosity': -1
+             }
+    """
     N_FOLDS = 5
     NUM_BOOST_ROUND = 10000
     EARLY_STOP_ROUND = 100
