@@ -22,6 +22,7 @@ def submission(config, pred, is_compres):
         df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv.zip' % now), index=False, compression='zip')
     else:
         df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv' % now), index=False)
+    # os.system('kaggle competitions submit -c microsoft-malware-prediction -f ./data/output/submission_%s.csv.zip -m "Message"' % now)
 
 
 def drop_cols(df, list_cols):

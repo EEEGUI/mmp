@@ -5,6 +5,8 @@ import numpy as np
 from tqdm import tqdm
 import pandas_profiling as pdf
 import warnings
+from utils.feature_selector import FeatureSelector
+
 
 warnings.filterwarnings('ignore')
 
@@ -81,15 +83,20 @@ def feature_engineer(save_feature=True):
     dataset.category_encoding()
 
     print('Drop some feature...')
-    dataset.drop_features()
     dataset.drop_key()
-
+    fs = FeatureSelector(data=dataset.get_df_train(), labels=dataset.get_label())
+    fs.identify_all(selection_params={'missing_threshold': 0.6, 'correlation_threshold': 0.98,
+                                      'task': 'classification', 'eval_metric': 'auc',
+                                      'cumulative_importance': 0.99})
+    df_train_drop_variables = fs.remove(methods='all', keep_one_hot=True)
+    remain_columns = df_train_drop_variables.columns
+    df_test_drop_variables = dataset.get_df_test().loc[:, remain_columns]
     if save_feature:
-        dataset.get_df_train().to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
-        dataset.get_df_test().to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')
+        df_train_drop_variables.to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
+        df_test_drop_variables.to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')
         dataset.get_label().to_hdf(mmp_config.LABEL_PATH, key='data', format='t')
 
-    return dataset.get_df_train(), dataset.get_df_test(), dataset.get_label()
+    return df_train_drop_variables, df_test_drop_variables, dataset.get_label()
 
 
 def convert_format():
@@ -132,4 +139,5 @@ def feature_report():
 
 
 if __name__ == '__main__':
-    convert_format()
+    # convert_format()
+    feature_engineer(False)
