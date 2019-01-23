@@ -61,7 +61,7 @@ class MMPDataSet(dataset.DataSet):
         self.df_all = self.drop_cols(self.df_all, self.config.COLUMNS_TO_DROP)
 
 
-def feature_engineer(save_feature=False):
+def feature_engineer(save_feature=True):
     mmp_config = config.Config()
     print('Reading train.h5...')
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
