@@ -48,7 +48,16 @@ class MMPDataSet(dataset.DataSet):
         for variable in tqdm(self.config.COLUMNS_TO_SPLIT):
             split_result = self.df_all[variable].apply(lambda x: x.split('.'))
             for i in range(len(split_result[0])):
-                self.df_all['%s_%d' % (variable, i)] = split_result.apply(lambda x: int(x[i]))
+                self.df_all['%s_%d' % (variable, i)] = split_result.apply(lambda x: self._to_int(x[i]))
+
+    @staticmethod
+    def _to_int(x):
+        try:
+            x = int(x)
+            return x
+
+        except 'can’t change x to int':
+            return np.nan
 
     def drop_features(self):
         self.df_all = self.drop_cols(self.df_all, self.config.COLUMNS_TO_DROP)

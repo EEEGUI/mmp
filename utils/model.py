@@ -29,11 +29,11 @@ class LGBM:
 
             valid_x, valid_y = self.train_features.iloc[valid_indices, :], self.train_labels.iloc[valid_indices, :]
 
-            lgb_trian = lgb.Dataset(train_x, train_y)
+            lgb_train = lgb.Dataset(train_x, train_y)
             lgb_eval = lgb.Dataset(valid_x, valid_y)
-            gbm = lgb.train(self.config.PARAM, lgb_trian,
+            gbm = lgb.train(self.config.PARAM, lgb_train,
                             num_boost_round=self.config.NUM_BOOST_ROUND,
-                            valid_sets=lgb_eval,
+                            valid_sets=[lgb_train, lgb_eval],
                             early_stopping_rounds=self.config.EARLY_STOP_ROUND,
                             categorical_feature=self.config.CATEGORY_VARIABLES)
 
