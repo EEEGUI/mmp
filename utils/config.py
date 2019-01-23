@@ -18,6 +18,8 @@ class Config(object):
 
     FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
 
+    FEATURE_TO_DROP_JSON = 'assets/features_to_drop.json'
+
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
     NROWS = 10000

@@ -91,6 +91,8 @@ def feature_engineer(save_feature=True):
     df_train_drop_variables = fs.remove(methods='all', keep_one_hot=True)
     remain_columns = df_train_drop_variables.columns
     df_test_drop_variables = dataset.get_df_test().loc[:, remain_columns]
+
+    save_as_json(fs.ops, mmp_config.FEATURE_TO_DROP_JSON)
     if save_feature:
         df_train_drop_variables.to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
         df_test_drop_variables.to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')

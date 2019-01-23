@@ -3,6 +3,7 @@ import time
 import pandas as pd
 import os
 from datetime import datetime
+import json
 
 
 @contextmanager
@@ -37,6 +38,11 @@ def drop_cols(df, list_cols):
 
 def save_as_h5(df, path):
     df.to_hdf(path, key='data', format='table')
+
+
+def save_as_json(dict_, path):
+    with open(path, 'w+') as f:
+        json.dump(dict_, f)
 
 
 
