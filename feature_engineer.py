@@ -44,8 +44,17 @@ class MMPDataSet(dataset.DataSet):
     def drop_key(self):
         self.df_all = self.drop_cols(self.df_all, [self.config.KEY])
 
+    def split_feature(self):
+        for variable in tqdm(self.config.COLUMNS_TO_SPLIT):
+            split_result = self.df_all[variable].apply(lambda x: x.split('.'))
+            for i in range(len(split_result[0])):
+                self.df_all['%s_%d' % (variable, i)] = split_result.apply(lambda x: int(x[i]))
 
-def feature_engineer(save_feature = False):
+    def drop_features(self):
+        self.df_all = self.drop_cols(self.df_all, self.config.COLUMNS_TO_DROP)
+
+
+def feature_engineer(save_feature=False):
     mmp_config = config.Config()
     print('Reading train.h5...')
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
@@ -58,8 +67,14 @@ def feature_engineer(save_feature = False):
     del df_train
     del df_test
 
+    print('Split feature...')
+    dataset.split_feature()
+
     print('Label encoding...')
     dataset.category_encoding()
+
+    print('Drop some feature...')
+    dataset.drop_features()
     dataset.drop_key()
 
     if save_feature:
@@ -72,35 +87,22 @@ def feature_engineer(save_feature = False):
 
 def convert_format():
     mmp_config = config.Config()
-
-    numerics = ['int8', 'int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-    numerical_columns = [c for c, v in mmp_config.DTYPES.items() if v in numerics]
-    categorical_columns = [c for c, v in mmp_config.DTYPES.items() if v not in numerics]
-    retained_columns = numerical_columns + categorical_columns
     print('Reading train.csv...')
     with timer('Read train.csv'):
         df_train = pd.read_csv(mmp_config.TRAIN_PATH,
                                nrows=mmp_config.NROWS,
-                               dtype=mmp_config.DTYPES,
-                               usecols=retained_columns)
-    retained_columns.remove('HasDetections')
+                               dtype=mmp_config.DTYPES)
+
     print('Reading test.csv...')
     with timer('Read test.csv'):
         df_test = pd.read_csv(mmp_config.TEST_PATH,
                               nrows=mmp_config.NROWS,
-                              dtype=mmp_config.DTYPES,
-                              usecols=retained_columns)
+                              dtype=mmp_config.DTYPES)
 
     with timer('Save to train.h5'):
         save_as_h5(df_train, mmp_config.TRAIN_H5_PATH)
     with timer('Save to test.h5'):
         save_as_h5(df_test, mmp_config.TEST_H5_PATH)
-
-    with timer('Read train.h5'):
-        df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
-
-    with timer('Read test.h5'):
-        df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
 
 def feature_report():
@@ -123,4 +125,4 @@ def feature_report():
 
 
 if __name__ == '__main__':
-    feature_report()
+    convert_format()
