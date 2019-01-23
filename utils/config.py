@@ -122,8 +122,7 @@ class Config(object):
         'Census_InternalBatteryNumberOfCharges'
     ]
 
-    FREQUENT_ENCODED_COLUMNS = ['AppVersion',
-                                'AVProductStatesIdentifier',
+    FREQUENT_ENCODED_COLUMNS = ['AppVersion', 'AVProductStatesIdentifier',
                                 'AvSigVersion',
                                 'Census_ChassisTypeName',
                                 'Census_FirmwareManufacturerIdentifier',
