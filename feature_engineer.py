@@ -52,11 +52,9 @@ class MMPDataSet(dataset.DataSet):
 
     @staticmethod
     def _to_int(x):
-        try:
-            x = int(x)
-            return x
-
-        except 'can’t change x to int':
+        if set(x) < set(range(0, 10)):
+            return int(x)
+        else:
             return np.nan
 
     def drop_features(self):
