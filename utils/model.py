@@ -33,7 +33,7 @@ class LGBM:
             lgb_eval = lgb.Dataset(valid_x, valid_y)
             gbm = lgb.train(self.config.PARAM, lgb_train,
                             num_boost_round=self.config.NUM_BOOST_ROUND,
-                            valid_sets=[lgb_train, lgb_eval],
+                            valid_sets=lgb_eval,
                             early_stopping_rounds=self.config.EARLY_STOP_ROUND,
                             categorical_feature=self.config.CATEGORY_VARIABLES)
 
