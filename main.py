@@ -21,10 +21,12 @@ def train(train_feature, test_feature, label, load_data=False):
 
 
 def main():
-    with timer('Feature Engineer'):
-        train_feature, test_feature, label = feature_engineer()
+    # with timer('Feature Engineer'):
+    #     train_feature, test_feature, label = feature_engineer()
+    # with timer('Training'):
+    #     train(train_feature, test_feature, label)
     with timer('Training'):
-        train(train_feature, test_feature, label)
+        train(None, None, None, True)
 
 
 if __name__ == '__main__':
