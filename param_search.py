@@ -59,13 +59,13 @@ class ParamSearch:
             results.loc[i, :] = eval_results
 
         # Sort with best score on top
-        results.sort_values('score', ascending=True, inplace=True)
+        results.sort_values('score', ascending=False, inplace=True)
         results.reset_index(inplace=True)
 
         param_dict = results.loc[0, 'params']
         save_as_json(param_dict, config.LIGHTGBM_BEST_PARAM)
         print(param_dict)
-        return results
+        print(results.loc[0, 'score'])
 
     def grid_search(self):
         """Grid search algorithm (with limit on max evals)"""
@@ -115,7 +115,5 @@ if __name__ == '__main__':
     df_train = pd.read_hdf(config.TRAIN_FEATURE_PATH)
     df_train_label = pd.read_hdf(config.LABEL_PATH)
     param_search = ParamSearch(df_train, df_train_label, config)
-    print(param_search.random_search())
-
-
+    param_search.random_search()
 

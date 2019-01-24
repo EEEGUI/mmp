@@ -197,7 +197,6 @@ class Config(object):
         'boosting_type': ['gbdt', 'goss', 'dart'],
         'objective': ['binary'],
         'metric': ['auc'],
-        'verbosity': [-1],
         'num_leaves': list(range(30, 150)),
         'learning_rate': list(np.logspace(np.log10(0.005), np.log10(0.5), base=10, num=1000)),
         'min_child_samples': list(range(10, 100)), # default 20
@@ -207,7 +206,7 @@ class Config(object):
         'bagging_fraction': list(np.linspace(0.5, 1, 100)) # 数据抽取 default 1.0
     }
 
-    SEARCH_TIME = 100
+    SEARCH_TIME = 5
 
     N_FOLDS = 5
     NUM_BOOST_ROUND = 10000
