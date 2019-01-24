@@ -187,7 +187,8 @@ class Config(object):
                 'lambda_l1': 0.1,
                 'lambda_l2': 0.1,
                 'random_state': 133,
-                'verbosity': -1
+                'verbosity': -1,
+                'score':0.5
              }
 
 

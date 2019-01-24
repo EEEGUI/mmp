@@ -41,10 +41,12 @@ class ParamSearch:
 
     def random_search(self):
         """Random search for hyperparameter optimization"""
-
-        # Dataframe for results
-        results = pd.DataFrame(columns=['score', 'params', 'iteration'],
-                               index=list(range(self.max_evals)))
+        best_score = 0
+        best_param = {}
+        if os.path.exists(self.config.LIGHTGBM_BEST_PARAM):
+            best_param = read_json(self.config.LIGHTGBM_BEST_PARAM)
+            if 'score' in best_param.keys():
+                best_score = best_param['score']
 
         # Keep searching until reach max evaluations
         for i in tqdm(range(self.max_evals)):
@@ -56,16 +58,14 @@ class ParamSearch:
             # Evaluate randomly selected hyperparameters
             eval_results = self.objective(hyperparameters, i)
             print('score:%.5f:' % eval_results[0])
-            results.loc[i, :] = eval_results
+            if eval_results[0] > best_score:
+                best_param = eval_results[1]
+                best_score = eval_results[0]
+                best_param['score'] = best_score
+                save_as_json(best_param, config.LIGHTGBM_BEST_PARAM)
 
-        # Sort with best score on top
-        results.sort_values('score', ascending=False, inplace=True)
-        results.reset_index(inplace=True)
-
-        param_dict = results.loc[0, 'params']
-        save_as_json(param_dict, config.LIGHTGBM_BEST_PARAM)
-        print(param_dict)
-        print(results.loc[0, 'score'])
+        print(best_param)
+        print(best_score)
 
     def grid_search(self):
         """Grid search algorithm (with limit on max evals)"""
