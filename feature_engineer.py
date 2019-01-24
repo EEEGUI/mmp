@@ -44,9 +44,17 @@ class MMPDataSet(dataset.DataSet):
         self.frequent_encoding(self.frequency_encoded_variables)
         self.label_encoding(self.label_encoded_variables)
 
-    def category_frequent(self):
+    def cal_category_frequency(self, variable):
+        t = self.df_all[variable].value_counts().reset_index()
+        t = t.reset_index()
+        t.set_index('index', inpalce=True)
+        t['level_0'] = (t['level_0'] / len(t)).astype('float8')
+        return t.to_dict()['level_0']
+
+    def category_to_frequent(self):
         for variable in tqdm(self.category_variables):
-            self.df_all[variable+'_f'] = self.df_all.groupby(variable)[variable].transform('count') / len(self.df_all)
+            category_2_frequency_dict = self.cal_category_frequency(variable)
+            self
 
     def drop_key(self):
         self.df_all = self.drop_cols(self.df_all, [self.config.KEY])
@@ -84,6 +92,35 @@ class MMPDataSet(dataset.DataSet):
 
         save_as_json(fs.ops, self.config.FEATURE_TO_DROP_JSON)
 
+    def reduce_memory_usage(self):
+        verbose = True
+        numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+        start_mem = train.memory_usage().sum() / 1024 ** 2
+        for col in tqdm(train.columns):
+            col_type = train[col].dtypes
+            if col_type in numerics:
+                c_min = train[col].min()
+                c_max = train[col].max()
+                if str(col_type)[:3] == 'int':
+                    if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
+                        train[col] = train[col].astype(np.int8)
+                    elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
+                        train[col] = train[col].astype(np.int16)
+                    elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
+                        train[col] = train[col].astype(np.int32)
+                    elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
+                        train[col] = train[col].astype(np.int64)
+                else:
+                    if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
+                        train[col] = train[col].astype(np.float16)
+                    elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
+                        train[col] = train[col].astype(np.float32)
+                    else:
+                        train[col] = train[col].astype(np.float64)
+        end_mem = train.memory_usage().sum() / 1024 ** 2
+        if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (
+                    start_mem - end_mem) / start_mem))
+
 
 def feature_engineer(save_feature=True):
     mmp_config = config.Config()
@@ -105,7 +142,7 @@ def feature_engineer(save_feature=True):
     dataset.category_encoding()
 
     print('Generate new feature')
-    dataset.category_frequent()
+    dataset.category_to_frequent()
 
     print('Drop some feature...')
     dataset.drop_key()
