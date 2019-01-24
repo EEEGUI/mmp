@@ -1,3 +1,6 @@
+import numpy as np
+
+
 class Config(object):
 
     ##  File Path ##
@@ -19,6 +22,8 @@ class Config(object):
     FEATURE_IMPORTANCE_FIG = 'assets/feature_importance.png'
 
     FEATURE_TO_DROP_JSON = 'assets/features_to_drop.json'
+
+    LIGHTGBM_BEST_PARAM = 'assets/lightgbm_param.json'
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
@@ -152,22 +157,22 @@ class Config(object):
     COLUMNS_TO_SPLIT = ['AvSigVersion', 'AppVersion', 'Census_OSVersion', 'EngineVersion', 'OsVer']
     ## Model ##
 
-    PARAM = {'num_leaves': 60,
-             'min_data_in_leaf': 60,
-             'objective': 'binary',
-             'max_depth': -1,
-             'learning_rate': 0.1,
-             "boosting": "gbdt",
-             "feature_fraction": 0.8,
-             "bagging_freq": 1,
-             "bagging_fraction": 0.8,
-             "bagging_seed": 11,
-             "metric": 'auc',
-             "lambda_l1": 0.1,
-             "random_state": 133,
-             "verbosity": -1}
+    # PARAM = {'num_leaves': 60,
+    #          'min_data_in_leaf': 60,
+    #          'objective': 'binary',
+    #          'max_depth': -1,
+    #          'learning_rate': 0.1,
+    #          "boosting": "gbdt",
+    #          "feature_fraction": 0.8,
+    #          "bagging_freq": 1,
+    #          "bagging_fraction": 0.8,
+    #          "bagging_seed": 11,
+    #          "metric": 'auc',
+    #          "lambda_l1": 0.1,
+    #          "random_state": 133,
+    #          "verbosity": -1}
 
-    """
+
     PARAM = {
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
@@ -184,7 +189,26 @@ class Config(object):
                 'random_state': 133,
                 'verbosity': -1
              }
-    """
+
+
+    ## Param Search ##
+
+    PARAM_GRID = {
+        'boosting_type': ['gbdt', 'goss', 'dart'],
+        'objective': ['binary'],
+        'metric': ['auc'],
+        'verbosity': [-1],
+        'num_leaves': list(range(30, 150)),
+        'learning_rate': list(np.logspace(np.log10(0.005), np.log10(0.5), base=10, num=1000)),
+        'min_child_samples': list(range(10, 100)), # default 20
+        'reg_alpha': list(np.linspace(0, 1)), # default 0 正则L1
+        'reg_lambda': list(np.linspace(0, 1)), # default 0 正则L2
+        'feature_fraction': list(np.linspace(0.6, 1, 10)), # 特征抽取 default 1.0
+        'bagging_fraction': list(np.linspace(0.5, 1, 100)) # 数据抽取 default 1.0
+    }
+
+    SEARCH_TIME = 100
+
     N_FOLDS = 5
     NUM_BOOST_ROUND = 10000
     EARLY_STOP_ROUND = 100
