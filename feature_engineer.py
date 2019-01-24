@@ -20,6 +20,7 @@ class MMPDataSet(dataset.DataSet):
                                         if (c not in self.true_numerical_variables) &
                                         (c not in self.frequency_encoded_variables) &
                                         (c != self.config.KEY)]
+        self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -43,6 +44,10 @@ class MMPDataSet(dataset.DataSet):
         self.frequent_encoding(self.frequency_encoded_variables)
         self.label_encoding(self.label_encoded_variables)
 
+    def category_frequent(self):
+        for variable in tqdm(self.category_variables):
+            self.df_all[variable+'_f'] = self.df_all.groupby(variable)[variable].transform('count') / len(self.df_all)
+
     def drop_key(self):
         self.df_all = self.drop_cols(self.df_all, [self.config.KEY])
 
@@ -60,7 +65,24 @@ class MMPDataSet(dataset.DataSet):
             return np.nan
 
     def drop_features(self):
-        self.df_all = self.drop_cols(self.df_all, self.config.COLUMNS_TO_DROP)
+        cols_to_drop_dict = read_json(self.config.FEATURE_TO_DROP_JSON)
+        cols_to_drop = []
+        for key in cols_to_drop_dict:
+            cols_to_drop += cols_to_drop_dict[key]
+        cols_to_drop += self.config.COLUMNS_TO_DROP
+        cols_to_drop = list(set(cols_to_drop))
+        self.df_all = self.drop_cols(self.df_all, cols_to_drop)
+
+    def find_useless_feature(self):
+        fs = FeatureSelector(data=self.get_df_train(), labels=self.get_label())
+        fs.identify_all(selection_params={'missing_threshold': 0.6, 'correlation_threshold': 0.98,
+                                          'task': 'classification', 'eval_metric': 'auc',
+                                          'cumulative_importance': 0.99})
+        df_train_drop_variables = fs.remove(methods='all', keep_one_hot=True)
+        remain_columns = df_train_drop_variables.columns
+        self.df_all = self.df_all.loc[:, remain_columns]
+
+        save_as_json(fs.ops, self.config.FEATURE_TO_DROP_JSON)
 
 
 def feature_engineer(save_feature=True):
@@ -82,23 +104,18 @@ def feature_engineer(save_feature=True):
     print('Label encoding...')
     dataset.category_encoding()
 
+    print('Generate new feature')
+    dataset.category_frequent()
+
     print('Drop some feature...')
     dataset.drop_key()
-    fs = FeatureSelector(data=dataset.get_df_train(), labels=dataset.get_label())
-    fs.identify_all(selection_params={'missing_threshold': 0.6, 'correlation_threshold': 0.98,
-                                      'task': 'classification', 'eval_metric': 'auc',
-                                      'cumulative_importance': 0.99})
-    df_train_drop_variables = fs.remove(methods='all', keep_one_hot=True)
-    remain_columns = df_train_drop_variables.columns
-    df_test_drop_variables = dataset.get_df_test().loc[:, remain_columns]
 
-    save_as_json(fs.ops, mmp_config.FEATURE_TO_DROP_JSON)
     if save_feature:
-        df_train_drop_variables.to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
-        df_test_drop_variables.to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')
+        dataset.get_df_train().to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
+        dataset.get_df_test().to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')
         dataset.get_label().to_hdf(mmp_config.LABEL_PATH, key='data', format='t')
 
-    return df_train_drop_variables, df_test_drop_variables, dataset.get_label()
+    return dataset.get_df_train(), dataset.get_df_test(), dataset.get_label()
 
 
 def convert_format():
@@ -142,4 +159,4 @@ def feature_report():
 
 if __name__ == '__main__':
     # convert_format()
-    feature_engineer(False)
+    feature_engineer(save_feature=False)

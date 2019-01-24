@@ -1,6 +1,6 @@
 import pandas as pd
 import lightgbm as lgb
-from sklearn.model_selection import KFold
+from sklearn.model_selection import KFold, train_test_split
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -15,7 +15,7 @@ class LGBM:
         self.config = config
         self.feature_importance = None
 
-    def train(self, **kwargs):
+    def k_fold_train(self, **kwargs):
         k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         # valid_scores = []
         # train_scores = []
@@ -52,6 +52,24 @@ class LGBM:
         self.feature_importance = pd.DataFrame({'feature': self.train_features.columns,
                                                 'importance': feature_importance_values})
 
+        self.plot_feature_importance()
+        print('Saving model...')
+        # save model to file
+        gbm.save_model(self.config.MODEL_SAVING_PATH)
+        return test_predictions
+
+    def train(self):
+        train_x, valid_x, train_y, valid_y = train_test_split(self.train_features, self.train_labels, test_size=0.2, random_state=712)
+        lgb_train = lgb.Dataset(train_x, train_y)
+        lgb_eval = lgb.Dataset(valid_x, valid_y)
+        gbm = lgb.train(self.config.PARAM, lgb_train,
+                        num_boost_round=self.config.NUM_BOOST_ROUND,
+                        valid_sets=lgb_eval,
+                        early_stopping_rounds=self.config.EARLY_STOP_ROUND,
+                        categorical_feature=self.config.CATEGORY_VARIABLES)
+        test_predictions = gbm.predict(self.test_features, num_iteration=gbm.best_iteration)
+        self.feature_importance = pd.DataFrame({'feature': self.train_features.columns,
+                                                'importance': gbm.feature_importance()})
         self.plot_feature_importance()
         print('Saving model...')
         # save model to file

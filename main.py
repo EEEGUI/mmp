@@ -8,7 +8,7 @@ from feature_engineer import feature_engineer
 warnings.filterwarnings('ignore', category=Warning)
 
 
-def train(train_feature, test_feature, label, load_data=False):
+def train(train_feature, test_feature, label, load_data):
     config = Config
     if load_data:
         train_feature = pd.read_hdf(config.TRAIN_FEATURE_PATH, key='data')
@@ -21,12 +21,12 @@ def train(train_feature, test_feature, label, load_data=False):
 
 
 def main():
-    # with timer('Feature Engineer'):
-    #     train_feature, test_feature, label = feature_engineer()
-    # with timer('Training'):
-    #     train(train_feature, test_feature, label)
+    with timer('Feature Engineer'):
+        train_feature, test_feature, label = feature_engineer()
     with timer('Training'):
-        train(None, None, None, True)
+        train(train_feature, test_feature, label, load_data=False)
+    # with timer('Training'):
+    #     train(None, None, None, True)
 
 
 if __name__ == '__main__':

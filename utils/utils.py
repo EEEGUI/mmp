@@ -15,7 +15,7 @@ def timer(title):
 
 def submission(config, pred, is_compres):
     now = datetime.now().strftime("%Y%m%d-%H%M%S")
-    df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=config.NROWS)
+    df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=len(pred))
     df[config.LABEL_COL_NAME] = pred
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
@@ -43,6 +43,12 @@ def save_as_h5(df, path):
 def save_as_json(dict_, path):
     with open(path, 'w+') as f:
         json.dump(dict_, f)
+
+
+def read_json(path):
+    with open(path, 'r') as f:
+        dict_ = json.load(f)
+        return dict_
 
 
 
