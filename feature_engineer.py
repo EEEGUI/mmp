@@ -47,17 +47,19 @@ class MMPDataSet(dataset.DataSet):
     def cal_category_frequency(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
         t = t.reset_index()
-        t.set_index('index', inpalce=True)
-        t['level_0'] = (t['level_0'] / len(t)).astype('float8')
+        t.set_index('index', inplace=True)
+        t['level_0'] = t['level_0'] / len(t)
+        t['level_0'] = t['level_0'].astype('float16')
         return t.to_dict()['level_0']
 
     def category_to_frequent(self):
         for variable in tqdm(self.category_variables):
             category_2_frequency_dict = self.cal_category_frequency(variable)
-            self
+            self.df_all[variable + '_f'] = self.df_all[variable].map(lambda x: category_2_frequency_dict.get(x, np.nan))
 
     def drop_key(self):
         self.df_all = self.drop_cols(self.df_all, [self.config.KEY])
+        self.update_features([self.config.KEY])
 
     def split_feature(self):
         for variable in tqdm(self.config.COLUMNS_TO_SPLIT):
@@ -80,6 +82,16 @@ class MMPDataSet(dataset.DataSet):
         cols_to_drop += self.config.COLUMNS_TO_DROP
         cols_to_drop = list(set(cols_to_drop))
         self.df_all = self.drop_cols(self.df_all, cols_to_drop)
+        self.update_features(cols_to_drop)
+
+    def update_features(self, cols_to_drop):
+        """
+        删除部分特征后，维护当前最新的类别特征和数值型特征，防止出现key error
+        :return:
+        """
+        self.frequency_encoded_variables = list(set(self.frequency_encoded_variables) - set(cols_to_drop))
+        self.label_encoded_variables = list(set(self.label_encoded_variables) - set(cols_to_drop))
+        self.category_variables = list(set(self.category_variables) - set(cols_to_drop))
 
     def find_useless_feature(self):
         fs = FeatureSelector(data=self.get_df_train(), labels=self.get_label())
@@ -95,29 +107,29 @@ class MMPDataSet(dataset.DataSet):
     def reduce_memory_usage(self):
         verbose = True
         numerics = ['int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-        start_mem = train.memory_usage().sum() / 1024 ** 2
-        for col in tqdm(train.columns):
-            col_type = train[col].dtypes
+        start_mem = self.df_all.memory_usage().sum() / 1024 ** 2
+        for col in tqdm(self.df_all.columns):
+            col_type = self.df_all[col].dtypes
             if col_type in numerics:
-                c_min = train[col].min()
-                c_max = train[col].max()
+                c_min = self.df_all[col].min()
+                c_max = self.df_all[col].max()
                 if str(col_type)[:3] == 'int':
                     if c_min > np.iinfo(np.int8).min and c_max < np.iinfo(np.int8).max:
-                        train[col] = train[col].astype(np.int8)
+                        self.df_all[col] = self.df_all[col].astype(np.int8)
                     elif c_min > np.iinfo(np.int16).min and c_max < np.iinfo(np.int16).max:
-                        train[col] = train[col].astype(np.int16)
+                        self.df_all[col] = self.df_all[col].astype(np.int16)
                     elif c_min > np.iinfo(np.int32).min and c_max < np.iinfo(np.int32).max:
-                        train[col] = train[col].astype(np.int32)
+                        self.df_all[col] = self.df_all[col].astype(np.int32)
                     elif c_min > np.iinfo(np.int64).min and c_max < np.iinfo(np.int64).max:
-                        train[col] = train[col].astype(np.int64)
+                        self.df_all[col] = self.df_all[col].astype(np.int64)
                 else:
                     if c_min > np.finfo(np.float16).min and c_max < np.finfo(np.float16).max:
-                        train[col] = train[col].astype(np.float16)
+                        self.df_all[col] = self.df_all[col].astype(np.float16)
                     elif c_min > np.finfo(np.float32).min and c_max < np.finfo(np.float32).max:
-                        train[col] = train[col].astype(np.float32)
+                        self.df_all[col] = self.df_all[col].astype(np.float32)
                     else:
-                        train[col] = train[col].astype(np.float64)
-        end_mem = train.memory_usage().sum() / 1024 ** 2
+                        self.df_all[col] = self.df_all[col].astype(np.float64)
+        end_mem = self.df_all.memory_usage().sum() / 1024 ** 2
         if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (
                     start_mem - end_mem) / start_mem))
 
@@ -138,14 +150,19 @@ def feature_engineer(save_feature=True):
     # print('Split feature...')
     # dataset.split_feature()
 
+    print('Drop features')
+    dataset.drop_key()
+    dataset.drop_features()
+
     print('Label encoding...')
     dataset.category_encoding()
 
     print('Generate new feature')
     dataset.category_to_frequent()
 
-    print('Drop some feature...')
-    dataset.drop_key()
+    print('%d features are used in train' % dataset.df_all.shape[1])
+
+    dataset.reduce_memory_usage()
 
     if save_feature:
         dataset.get_df_train().to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
