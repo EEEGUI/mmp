@@ -192,7 +192,7 @@ train = pd.read_csv(mmp_config.TRAIN_PATH, dtype=dtypes, nrows=mmp_config.NROWS)
 # In[ ]:
 
 
-random_sample_percent = 5/8
+random_sample_percent = 1
 random_state = 15
 number_of_folds = 5
 stop_after_fold_number = 1
@@ -260,24 +260,6 @@ def encode_categorical_columns(x_train, x_test, columns, sort=True):
 train, test = encode_categorical_columns(train, test, categorical_columns)
 train = reduce_mem_usage(train)
 test = reduce_mem_usage(test)
-
-
-# In[ ]:
-
-
-# idea from this kernel: https://www.kaggle.com/fabiendaniel/detecting-malwares-with-lgbm
-def predict_chunk(model, test):
-    initial_idx = 0
-    chunk_size = 1000000
-    current_pred = np.zeros(len(test))
-    while initial_idx < test.shape[0]:
-        final_idx = min(initial_idx + chunk_size, test.shape[0])
-        idx = range(initial_idx, final_idx)
-        current_pred[idx] = model.predict(test.iloc[idx], num_iteration=model.best_iteration)
-        initial_idx = final_idx
-    #predictions += current_pred / min(folds.n_splits, max_iter)
-    return current_pred
-
 
 # In[ ]:
 
@@ -398,11 +380,12 @@ base_params = {
         'max_depth': 5,
         'num_leaves': 40,
         'sub_feature': 0.9,
-        'sub_row':0.9,
+        'sub_row': 0.9,
         'bagging_freq': 1,
         'lambda_l1': 0.1,
         'lambda_l2': 0.1,
-        'random_state': random_state
+        'random_state': random_state,
+        'verbosity': -1,
         }
 # base_params = {'objective':'binary', 
 #                "boosting": "gbdt", 
@@ -423,6 +406,7 @@ base_params = {
 
 # In[ ]:
 
+print('Shape of train is ', train.shape)
 
 models, validation_score = train_model(train.drop('HasDetections', axis=1),
                                       train_y, base_params,
