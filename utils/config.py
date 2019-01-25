@@ -188,7 +188,7 @@ class Config(object):
                 'lambda_l2': 0.1,
                 'random_state': 133,
                 'verbosity': -1,
-                'score':0.5
+                'score': 0.5
              }
 
 
@@ -210,8 +210,8 @@ class Config(object):
     SEARCH_TIME = 5
 
     N_FOLDS = 5
-    NUM_BOOST_ROUND = 10000
-    EARLY_STOP_ROUND = 100
+    NUM_BOOST_ROUND = 5120
+    EARLY_STOP_ROUND = 200
     MODEL_SAVING_PATH = 'assets/model.pkl'
 
 
