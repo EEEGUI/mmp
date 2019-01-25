@@ -5,7 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 from scipy.stats import rankdata
-
+from utils.utils import *
 
 class LGBM:
     def __init__(self, config, train_features, train_labels, test_features):
@@ -62,10 +62,9 @@ class LGBM:
         train_x, valid_x, train_y, valid_y = train_test_split(self.train_features, self.train_labels, test_size=0.2, random_state=712)
         lgb_train = lgb.Dataset(train_x, train_y)
         lgb_eval = lgb.Dataset(valid_x, valid_y)
-        gbm = lgb.train(self.config.PARAM, lgb_train,
-                        num_boost_round=self.config.NUM_BOOST_ROUND,
+        param = read_json(self.config.LIGHTGBM_BEST_PARAM)
+        gbm = lgb.train(param, lgb_train,
                         valid_sets=lgb_eval,
-                        early_stopping_rounds=self.config.EARLY_STOP_ROUND,
                         categorical_feature=self.config.CATEGORY_VARIABLES)
         test_predictions = gbm.predict(self.test_features, num_iteration=gbm.best_iteration)
         self.feature_importance = pd.DataFrame({'feature': self.train_features.columns,

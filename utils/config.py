@@ -188,7 +188,9 @@ class Config(object):
                 'lambda_l2': 0.1,
                 'random_state': 133,
                 'verbosity': -1,
-                'score': 0.5
+                'score': 0.5,
+                'num_boost_round': 10000,
+                'early_stopping_rounds': 200
              }
 
 
@@ -204,14 +206,14 @@ class Config(object):
         'reg_alpha': list(np.linspace(0, 1)), # default 0 正则L1
         'reg_lambda': list(np.linspace(0, 1)), # default 0 正则L2
         'feature_fraction': list(np.linspace(0.6, 1, 10)), # 特征抽取 default 1.0
-        'bagging_fraction': list(np.linspace(0.5, 1, 100)) # 数据抽取 default 1.0
+        'bagging_fraction': list(np.linspace(0.5, 1, 100)), # 数据抽取 default 1.0
+        'num_boost_round': [10000],
+        'early_stopping_rounds': [200]
     }
 
     SEARCH_TIME = 5
 
     N_FOLDS = 5
-    NUM_BOOST_ROUND = 5120
-    EARLY_STOP_ROUND = 200
     MODEL_SAVING_PATH = 'assets/model.pkl'
 
 

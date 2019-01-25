@@ -29,8 +29,7 @@ class ParamSearch:
             # Perform n_folds cross validation
         hyperparameters['verbose'] = -1
         hyperparameters['objective'] = 'binary'
-        cv_results = lgb.cv(hyperparameters, self.train_set, nfold=3, num_boost_round=10000,
-                            early_stopping_rounds=100, metrics='auc', shuffle=True)
+        cv_results = lgb.cv(hyperparameters, self.train_set, nfold=3, metrics='auc', shuffle=True)
 
         # results to return
         score = cv_results['auc-mean'][-1]
