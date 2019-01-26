@@ -138,10 +138,13 @@ def feature_engineer(save_feature=True):
     mmp_config = config.Config()
     print('Reading train.h5...')
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
+    if mmp_config.RANDOM_SAMPLE_PERCENTAGE:
+        df_train = df_train.sample(frac=mmp_config.RANDOM_SAMPLE_PERCENTAGE, random_state=mmp_config.RANDOM_STATE)
 
+    df_train_length = len(df_train)
     print('Reading test.h5...')
     df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
-
+    df_test_length = len(df_test)
     dataset = MMPDataSet(df_train, df_test, mmp_config)
 
     del df_train
@@ -154,13 +157,15 @@ def feature_engineer(save_feature=True):
     dataset.drop_key()
     dataset.drop_features()
 
-    print('Label encoding...')
-    dataset.category_encoding()
-
     print('Generate new feature')
     dataset.category_to_frequent()
 
+    print('Label encoding...')
+    dataset.category_encoding()
+
     print('%d features are used in train' % dataset.df_all.shape[1])
+    print('The length of train is %d' % df_train_length)
+    print('The length of test is %d' % df_test_length)
 
     dataset.reduce_memory_usage()
 
@@ -179,6 +184,10 @@ def convert_format():
         df_train = pd.read_csv(mmp_config.TRAIN_PATH,
                                nrows=mmp_config.NROWS,
                                dtype=mmp_config.DTYPES)
+    with timer('Save to train.h5'):
+        save_as_h5(df_train, mmp_config.TRAIN_H5_PATH)
+
+    del df_train
 
     print('Reading test.csv...')
     with timer('Read test.csv'):
@@ -186,8 +195,6 @@ def convert_format():
                               nrows=mmp_config.NROWS,
                               dtype=mmp_config.DTYPES)
 
-    with timer('Save to train.h5'):
-        save_as_h5(df_train, mmp_config.TRAIN_H5_PATH)
     with timer('Save to test.h5'):
         save_as_h5(df_test, mmp_config.TEST_H5_PATH)
 

@@ -66,6 +66,7 @@ class LGBM:
         gbm = lgb.train(param, lgb_train,
                         valid_sets=lgb_eval,
                         categorical_feature=self.config.CATEGORY_VARIABLES)
+        print('Predicting...')
         test_predictions = gbm.predict(self.test_features, num_iteration=gbm.best_iteration)
         self.feature_importance = pd.DataFrame({'feature': self.train_features.columns,
                                                 'importance': gbm.feature_importance()})

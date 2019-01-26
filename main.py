@@ -11,7 +11,6 @@ warnings.filterwarnings('ignore', category=Warning)
 def train(train_feature, test_feature, label, load_data):
     config = Config
     if load_data:
-
         train_feature = pd.read_hdf(config.TRAIN_FEATURE_PATH, key='data')
         test_feature = pd.read_hdf(config.TEST_FEATURE_PATH, key='data')
         label = pd.read_hdf(config.LABEL_PATH, key='data')

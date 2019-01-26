@@ -185,7 +185,7 @@ categorical_columns = [c for c,v in dtypes.items() if v not in numerics]
 
 # In[ ]:
 
-
+print('Read train csv...')
 train = pd.read_csv(mmp_config.TRAIN_PATH, dtype=dtypes, nrows=mmp_config.NROWS)
 
 
@@ -195,7 +195,7 @@ train = pd.read_csv(mmp_config.TRAIN_PATH, dtype=dtypes, nrows=mmp_config.NROWS)
 random_sample_percent = 1
 random_state = 15
 number_of_folds = 5
-stop_after_fold_number = 1
+stop_after_fold_number = None
 shuffle = True
 
 
@@ -221,7 +221,7 @@ train = reduce_mem_usage(train)
 
 # In[ ]:
 
-
+print('Read test csv...')
 test = pd.read_csv(mmp_config.TEST_PATH, dtype=dtypes, nrows=mmp_config.NROWS)
 # test.loc[6529507, 'OsBuildLab'] = '17134.1.amd64fre.rs4_release.180410-1804'
 test = reduce_mem_usage(test)

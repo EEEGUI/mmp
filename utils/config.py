@@ -27,7 +27,8 @@ class Config(object):
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
-    NROWS = 10000
+    NROWS = None
+    RANDOM_SAMPLE_PERCENTAGE = 0.1  # 训练集使用比例
     KEY = 'MachineIdentifier'
     DTYPES = {
                 'MachineIdentifier':                                    'category',
@@ -172,7 +173,6 @@ class Config(object):
     #          "random_state": 133,
     #          "verbosity": -1}
 
-
     PARAM = {
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
@@ -193,7 +193,6 @@ class Config(object):
                 'early_stopping_rounds': 200
              }
 
-
     ## Param Search ##
 
     PARAM_GRID = {
@@ -212,7 +211,7 @@ class Config(object):
     }
 
     SEARCH_TIME = 5
-
+    RANDOM_STATE = 712
     N_FOLDS = 5
     MODEL_SAVING_PATH = 'assets/model.pkl'
 

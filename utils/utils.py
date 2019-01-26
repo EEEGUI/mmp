@@ -14,6 +14,7 @@ def timer(title):
 
 
 def submission(config, pred, is_compres):
+    print('Generating submission...')
     now = datetime.now().strftime("%Y%m%d-%H%M%S")
     df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=len(pred))
     df[config.LABEL_COL_NAME] = pred
