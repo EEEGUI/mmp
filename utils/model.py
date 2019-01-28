@@ -7,6 +7,7 @@ import seaborn as sns
 from scipy.stats import rankdata
 from utils.utils import *
 
+
 class LGBM:
     def __init__(self, config, train_features, train_labels, test_features):
         self.train_features = train_features
@@ -32,9 +33,7 @@ class LGBM:
             lgb_train = lgb.Dataset(train_x, train_y)
             lgb_eval = lgb.Dataset(valid_x, valid_y)
             gbm = lgb.train(self.config.PARAM, lgb_train,
-                            num_boost_round=self.config.NUM_BOOST_ROUND,
                             valid_sets=lgb_eval,
-                            early_stopping_rounds=self.config.EARLY_STOP_ROUND,
                             categorical_feature=self.config.CATEGORY_VARIABLES)
 
             feature_importance_values += gbm.feature_importance() / k_fold.n_splits
