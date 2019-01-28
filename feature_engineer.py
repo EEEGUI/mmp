@@ -14,17 +14,41 @@ warnings.filterwarnings('ignore')
 class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
-        # self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
+
+        self.ori_number_variables = [v for v in self.df_all if config.DTYPES[v] in config.NUMBER_TYPE]   # 原始数据即为数值型
+        self.ori_category_variables = [v for v in self.df_all if config.DTYPES[v] not in config.NUMBER_TYPE]  # 原始数据不为数值型
+        self.category_as_number = []
+
+        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
+        self.false_numerical_variables = list(set(self.ori_number_variables) - set(self.true_numerical_variables))
+
         # self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
         # self.label_encoded_variables = [c for c in self.df_all.columns
         #                                 if (c not in self.true_numerical_variables) &
         #                                 (c not in self.frequency_encoded_variables) &
         #                                 (c != self.config.KEY)]
         # self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
+        #
+        # self.label_encoded_variables = self.ori_category_variables
 
-        self.ori_number_variables = [v for v in config.DTYPES if config.DTYPES[v] in config.NUMBER_TYPE]   # 原始数据即为数值型
-        self.ori_category_variables = [v for v in config.DTYPES if config.DTYPES[v] not in config.NUMBER_TYPE]  # 原始数据不为数值型
-        self.label_encoded_variables = self.ori_category_variables
+    def category_2_number(self):
+        """
+        将原始数据格式为类别型转化为数值型
+        :return:
+        """
+        self.category_as_number = []
+        for variable in self.ori_category_variables:
+            self.df_all['cateasnum_' + variable] = self.df_all[variable]
+            self.category_as_number.append('cateasnum_' + variable)
+        self.label_encoding(self.category_as_number)
+
+    def copy_false_number(self):
+        """
+        复制一份假的数值型数据作为真的数值型数据
+        :return:
+        """
+        for variable in self.false_numerical_variables:
+            self.df_all['num_' + variable] = self.df_all[variable]
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -93,9 +117,11 @@ class MMPDataSet(dataset.DataSet):
         删除部分特征后，维护当前最新的类别特征和数值型特征，防止出现key error
         :return:
         """
-        self.frequency_encoded_variables = list(set(self.frequency_encoded_variables) - set(cols_to_drop))
-        self.label_encoded_variables = list(set(self.label_encoded_variables) - set(cols_to_drop))
-        self.category_variables = list(set(self.category_variables) - set(cols_to_drop))
+        self.ori_category_variables = list(set(self.ori_category_variables) - set(cols_to_drop))
+        self.ori_number_variables = list(set(self.ori_number_variables) - set(cols_to_drop))
+        self.category_as_number = list(set(self.category_as_number) - set(cols_to_drop))
+        self.true_numerical_variables = list(set(self.true_numerical_variables) - set(cols_to_drop))
+        self.false_numerical_variables = list(set(self.false_numerical_variables) - set(cols_to_drop))
 
     def find_useless_feature(self):
         fs = FeatureSelector(data=self.get_df_train(), labels=self.get_label())
@@ -158,15 +184,19 @@ def feature_engineer(save_feature=True):
     # print('Split feature...')
     # dataset.split_feature()
 
-    # print('Drop features')
-    # dataset.drop_key()
+    print('Drop features')
+    dataset.drop_key()
     # dataset.drop_features()
 
     # print('Generate new feature')
     # dataset.category_to_frequent()
 
-    print('Label encoding...')
-    dataset.category_encoding()
+    # print('Label encoding...')
+    # dataset.category_encoding()
+
+    print('Category to number...')
+    dataset.category_2_number()
+    dataset.copy_false_number()
 
     print('%d features are used in train' % dataset.df_all.shape[1])
     print('The length of train is %d' % df_train_length)
