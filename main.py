@@ -22,12 +22,12 @@ def train(train_feature, test_feature, label, load_data):
 
 
 def main():
-    # with timer('Feature Engineer'):
-    #     train_feature, test_feature, label = feature_engineer()
-    # with timer('Training'):
-    #     train(train_feature, test_feature, label, load_data=False)
+    with timer('Feature Engineer'):
+        train_feature, test_feature, label = feature_engineer(save_feature=True)
     with timer('Training'):
-        train(None, None, None, True)
+        train(train_feature, test_feature, label, load_data=False)
+    # with timer('Training'):
+    #     train(None, None, None, True)
 
 
 if __name__ == '__main__':
