@@ -17,10 +17,11 @@ class MMPDataSet(dataset.DataSet):
 
         self.ori_number_variables = [v for v in self.df_all if config.DTYPES[v] in config.NUMBER_TYPE]   # 原始数据即为数值型
         self.ori_category_variables = [v for v in self.df_all if config.DTYPES[v] not in config.NUMBER_TYPE]  # 原始数据不为数值型
-        self.category_as_number = []
 
-        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
-        self.false_numerical_variables = list(set(self.ori_number_variables) - set(self.true_numerical_variables))
+        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS   # 具有实际意义的数值型字段
+        self.false_numerical_variables = list(set(self.ori_number_variables) - set(self.true_numerical_variables))  # 不具有实际意义的数值型数据
+
+        self.category_as_number = self.false_numerical_variables + self.ori_category_variables
 
         # self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
         # self.label_encoded_variables = [c for c in self.df_all.columns
@@ -31,24 +32,13 @@ class MMPDataSet(dataset.DataSet):
         #
         # self.label_encoded_variables = self.ori_category_variables
 
-    def category_2_number(self):
+    def category_to_number(self):
         """
-        将原始数据格式为类别型转化为数值型
+        将类别型数据作为数值型，作为新特征
         :return:
         """
-        self.category_as_number = []
-        for variable in self.ori_category_variables:
+        for variable in self.category_as_number:
             self.df_all['cateasnum_' + variable] = self.df_all[variable]
-            self.category_as_number.append('cateasnum_' + variable)
-        self.label_encoding(self.category_as_number)
-
-    def copy_false_number(self):
-        """
-        复制一份假的数值型数据作为真的数值型数据
-        :return:
-        """
-        for variable in self.false_numerical_variables:
-            self.df_all['num_' + variable] = self.df_all[variable]
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -70,7 +60,7 @@ class MMPDataSet(dataset.DataSet):
         :return:
         """
         # self.frequent_encoding(self.frequency_encoded_variables)
-        self.label_encoding(self.label_encoded_variables)
+        self.label_encoding(self.ori_category_variables)
 
     def cal_category_frequency(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -195,8 +185,8 @@ def feature_engineer(save_feature=True):
     # dataset.category_encoding()
 
     print('Category to number...')
-    dataset.category_2_number()
-    dataset.copy_false_number()
+    dataset.category_encoding()
+    dataset.category_to_number()
 
     print('%d features are used in train' % dataset.df_all.shape[1])
     print('The length of train is %d' % df_train_length)
