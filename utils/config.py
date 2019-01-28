@@ -116,6 +116,8 @@ class Config(object):
                 'HasDetections':                                        'int8'
             }
 
+    NUMBER_TYPE = ['int8', 'int16', 'int32', 'int64', 'float16', 'float32', 'float64']
+
 
     ## Feature Engineer ##
 

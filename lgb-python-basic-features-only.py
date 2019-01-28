@@ -179,8 +179,8 @@ def reduce_mem_usage(df, verbose=True):
 
 
 numerics = ['int8', 'int16', 'int32', 'int64', 'float16', 'float32', 'float64']
-numerical_columns = [c for c,v in dtypes.items() if v in numerics]
-categorical_columns = [c for c,v in dtypes.items() if v not in numerics]
+numerical_columns = [c for c, v in dtypes.items() if v in numerics]
+categorical_columns = [c for c, v in dtypes.items() if v not in numerics]
 
 
 # In[ ]:

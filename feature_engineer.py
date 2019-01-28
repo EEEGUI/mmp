@@ -14,13 +14,17 @@ warnings.filterwarnings('ignore')
 class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
-        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
-        self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
-        self.label_encoded_variables = [c for c in self.df_all.columns
-                                        if (c not in self.true_numerical_variables) &
-                                        (c not in self.frequency_encoded_variables) &
-                                        (c != self.config.KEY)]
-        self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
+        # self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS
+        # self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
+        # self.label_encoded_variables = [c for c in self.df_all.columns
+        #                                 if (c not in self.true_numerical_variables) &
+        #                                 (c not in self.frequency_encoded_variables) &
+        #                                 (c != self.config.KEY)]
+        # self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
+
+        self.ori_number_variables = [v for v in config.DTYPES if v in config.NUMBER_TYPE]   # 原始数据即为数值型
+        self.ori_category_variables = [v for v in config.DTYPES if v not in config.NUMBER_TYPE]  # 原始数据不为数值型
+        self.label_encoded_variables = self.ori_category_variables
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -41,7 +45,7 @@ class MMPDataSet(dataset.DataSet):
         给不同类别编码, 编成0, 1, 2, 3 ...的形式, 一个类别对应一个数字
         :return:
         """
-        self.frequent_encoding(self.frequency_encoded_variables)
+        # self.frequent_encoding(self.frequency_encoded_variables)
         self.label_encoding(self.label_encoded_variables)
 
     def cal_category_frequency(self, variable):
@@ -145,6 +149,7 @@ def feature_engineer(save_feature=True):
     print('Reading test.h5...')
     df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
     df_test_length = len(df_test)
+
     dataset = MMPDataSet(df_train, df_test, mmp_config)
 
     del df_train
@@ -153,12 +158,12 @@ def feature_engineer(save_feature=True):
     # print('Split feature...')
     # dataset.split_feature()
 
-    print('Drop features')
-    dataset.drop_key()
-    dataset.drop_features()
+    # print('Drop features')
+    # dataset.drop_key()
+    # dataset.drop_features()
 
-    print('Generate new feature')
-    dataset.category_to_frequent()
+    # print('Generate new feature')
+    # dataset.category_to_frequent()
 
     print('Label encoding...')
     dataset.category_encoding()
