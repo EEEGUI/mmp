@@ -22,8 +22,8 @@ class MMPDataSet(dataset.DataSet):
         #                                 (c != self.config.KEY)]
         # self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
 
-        self.ori_number_variables = [v for v in config.DTYPES if v in config.NUMBER_TYPE]   # 原始数据即为数值型
-        self.ori_category_variables = [v for v in config.DTYPES if v not in config.NUMBER_TYPE]  # 原始数据不为数值型
+        self.ori_number_variables = [v for v in config.DTYPES if config.DTYPES[v] in config.NUMBER_TYPE]   # 原始数据即为数值型
+        self.ori_category_variables = [v for v in config.DTYPES if config.DTYPES[v] not in config.NUMBER_TYPE]  # 原始数据不为数值型
         self.label_encoded_variables = self.ori_category_variables
 
     def _frequency_encoding(self, variable):

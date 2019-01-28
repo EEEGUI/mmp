@@ -27,7 +27,7 @@ class Config(object):
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
-    NROWS = None
+    NROWS = 100000
     RANDOM_SAMPLE_PERCENTAGE = 0.1  # 训练集使用比例
     KEY = 'MachineIdentifier'
     DTYPES = {
@@ -179,7 +179,6 @@ class Config(object):
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
                 'metric': 'auc',
-                'nthread': 4,
                 'learning_rate': 0.05,
                 'max_depth': 5,
                 'num_leaves': 40,

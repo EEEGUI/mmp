@@ -14,7 +14,8 @@ def train(train_feature, test_feature, label, load_data):
         train_feature = pd.read_hdf(config.TRAIN_FEATURE_PATH, key='data')
         test_feature = pd.read_hdf(config.TEST_FEATURE_PATH, key='data')
         label = pd.read_hdf(config.LABEL_PATH, key='data')
-    config.CATEGORY_VARIABLES = [c for c in train_feature.columns if c not in config.TRUE_NUMERICAL_COLUMNS]
+    # config.CATEGORY_VARIABLES = [c for c in train_feature.columns if c not in config.TRUE_NUMERICAL_COLUMNS]
+    config.CATEGORY_VARIABLES = 'auto'
     print('%d features are used for training...' % (train_feature.shape[1]))
     lgbm = LGBM(config, train_feature, label, test_feature)
     submission(config, lgbm.train(), True)

@@ -63,6 +63,7 @@ class LGBM:
         lgb_train = lgb.Dataset(train_x, train_y)
         lgb_eval = lgb.Dataset(valid_x, valid_y)
         param = read_json(self.config.LIGHTGBM_BEST_PARAM)
+        param = self.config.PARAM
         gbm = lgb.train(param, lgb_train,
                         valid_sets=lgb_eval,
                         categorical_feature=self.config.CATEGORY_VARIABLES)
