@@ -15,7 +15,7 @@ plt.style.use('ggplot')
 import lightgbm as lgb
 import time
 import datetime
-from tqdm import tqdm_notebook as tqdm
+from tqdm import tqdm
 from sklearn.model_selection import StratifiedKFold, KFold, TimeSeriesSplit
 from sklearn import metrics
 import gc
