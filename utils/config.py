@@ -27,7 +27,7 @@ class Config(object):
 
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
-    NROWS = 100000
+    NROWS = 10000
     RANDOM_SAMPLE_PERCENTAGE = 0.1  # 训练集使用比例
     KEY = 'MachineIdentifier'
     DTYPES = {

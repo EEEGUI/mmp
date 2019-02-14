@@ -7,6 +7,9 @@ from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from sklearn.model_selection import StratifiedKFold
 #from sklearn.metrics import roc_auc_score
 import gc
+from utils.config import Config
+
+mmpconfig = Config()
 gc.enable()
 
 dtypes = {
@@ -96,10 +99,10 @@ dtypes = {
         }
 
 print('Download Train and Test Data.\n')
-train = pd.read_csv('data/raw/train.csv', dtype=dtypes, low_memory=True)
+train = pd.read_csv('data/raw/train.csv', dtype=dtypes, low_memory=True, nrows=mmpconfig.NROWS)
 # train = pd.read_hdf('data/raw/train.h5')
 train['MachineIdentifier'] = train.index.astype('uint32')
-test = pd.read_csv('data/raw/test.csv',  dtype=dtypes, low_memory=True)
+test = pd.read_csv('data/raw/test.csv',  dtype=dtypes, low_memory=True, nrows=mmpconfig.NROWS)
 # test = pd.read_hdf('data/raw/test.h5')
 test['MachineIdentifier'] = test.index.astype('uint32')
 
@@ -251,7 +254,7 @@ for train_index, test_index in skf.split(train_ids, y_train):
 #print('\nLigthGBM VAL AUC Score: {}'.format(roc_auc_score(y_train, lgb_train_result)))
 #print('\nXGBoost VAL AUC Score: {}'.format(roc_auc_score(y_train, xgb_train_result)))
 
-submission = pd.read_csv('data/raw/sample_submission.csv')
+submission = pd.read_csv('data/raw/sample_submission.csv', nrows=mmpconfig.NROWS)
 submission['HasDetections'] = lgb_test_result / counter
 submission.to_csv('lgb_submission.csv', index=False)
 #submission['HasDetections'] = xgb_test_result / counter
