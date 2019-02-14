@@ -74,6 +74,11 @@ class LGBM:
         print('Saving model...')
         # save model to file
         gbm.save_model(self.config.MODEL_SAVING_PATH)
+
+        print('Plotting 1th tree with graphviz...')
+        graph = lgb.create_tree_digraph(gbm, tree_index=0, name='Tree1')
+        graph.render(filename='assets/tree_graph')
+
         return test_predictions
 
     def plot_feature_importance(self):
@@ -84,3 +89,5 @@ class LGBM:
         plt.title('LightGBM Features (avg over folds)')
         plt.tight_layout()
         plt.savefig(self.config.FEATURE_IMPORTANCE_FIG)
+
+
