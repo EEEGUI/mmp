@@ -181,7 +181,7 @@ class Config(object):
                 'metric': 'auc',
                 'learning_rate': 0.05,
                 'max_depth': 5,
-                'num_leaves': 40,
+                'num_leaves': 20,
                 'sub_feature': 0.9,
                 'sub_row': 0.9,
                 'bagging_freq': 1,
@@ -193,6 +193,19 @@ class Config(object):
                 'num_boost_round': 10000,
                 'early_stopping_rounds': 200
              }
+
+    SPARSE_MATRIX_PARAM = {
+                            'max_depth': -1,
+                            'metric': 'auc',
+                            'n_estimators': 30000,
+                            'learning_rate': 0.05,
+                            'num_leaves': 2**12-1,
+                            'colsample_bytree': 0.28,
+                            'objective': 'binary',
+                            'n_jobs': -1,
+                            'early_stopping_rounds': 100,
+                            'verbosity': -1
+                            }
 
     ## Param Search ##
 

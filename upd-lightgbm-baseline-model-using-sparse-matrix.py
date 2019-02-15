@@ -8,7 +8,9 @@ from sklearn.model_selection import StratifiedKFold
 #from sklearn.metrics import roc_auc_score
 import gc
 from utils.config import Config
+import warnings
 
+warnings.filterwarnings('ignore')
 mmpconfig = Config()
 gc.enable()
 
@@ -205,17 +207,23 @@ for train_index, test_index in skf.split(train_ids, y_train):
     X_val = vstack([train[test_index[i*m:(i+1)*m]]  for i in range(test_index.shape[0] //  m + 1)])
     X_fit, X_val = csr_matrix(X_fit, dtype='float32'), csr_matrix(X_val, dtype='float32')
     y_fit, y_val = y_train[train_index], y_train[test_index]
+
+    lgb_train = lgb.Dataset(X_fit, y_fit)
+    lgb_eval = lgb.Dataset(X_val, y_val)
+    print('shape of x is ', X_fit.shape)
     
     del train
     gc.collect()
 
-    lgb_model = lgb.LGBMClassifier(max_depth=-1,
-                                   n_estimators=30000,
-                                   learning_rate=0.05,
-                                   num_leaves=2**12-1,
-                                   colsample_bytree=0.28,
-                                   objective='binary', 
-                                   n_jobs=-1)
+    lgb_model = lgb.train(mmpconfig.SPARSE_MATRIX_PARAM, lgb_train, valid_sets=[lgb_train, lgb_eval])
+
+    # lgb_model = lgb.LGBMClassifier(max_depth=-1,
+    #                                n_estimators=30000,
+    #                                learning_rate=0.05,
+    #                                num_leaves=2**12-1,
+    #                                colsample_bytree=0.28,
+    #                                objective='binary',
+    #                                n_jobs=-1)
                                    
     #xgb_model = xgb.XGBClassifier(max_depth=6,
     #                              n_estimators=30000,
@@ -225,9 +233,11 @@ for train_index, test_index in skf.split(train_ids, y_train):
     #                              n_jobs=-1)
     
                                
-    lgb_model.fit(X_fit, y_fit, eval_metric='auc', 
-                  eval_set=[(X_val, y_val)], 
-                  verbose=100, early_stopping_rounds=100)
+    # lgb_model.fit(X_fit, y_fit, eval_metric='auc',
+    #               eval_set=[(X_val, y_val)],
+    #               verbose=100, early_stopping_rounds=100)
+
+
                   
     #xgb_model.fit(X_fit, y_fit, eval_metric='auc', 
     #              eval_set=[(X_val, y_val)], 
@@ -241,7 +251,7 @@ for train_index, test_index in skf.split(train_ids, y_train):
     
     test = load_npz('test.npz')
     test = csr_matrix(test, dtype='float32')
-    lgb_test_result += lgb_model.predict_proba(test)[:,1]
+    lgb_test_result += lgb_model.predict(test, num_iteration=lgb_model.best_iteration)
     #xgb_test_result += xgb_model.predict_proba(test)[:,1]
     counter += 1
     
@@ -256,7 +266,7 @@ for train_index, test_index in skf.split(train_ids, y_train):
 
 submission = pd.read_csv('data/raw/sample_submission.csv', nrows=mmpconfig.NROWS)
 submission['HasDetections'] = lgb_test_result / counter
-submission.to_csv('lgb_submission.csv', index=False)
+submission.to_csv('lgb_submission2.csv', index=False)
 #submission['HasDetections'] = xgb_test_result / counter
 #submission.to_csv('xgb_submission.csv', index=False)
 #submission['HasDetections'] = 0.5 * lgb_test_result / counter  + 0.5 * xgb_test_result / counter 
