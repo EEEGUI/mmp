@@ -23,6 +23,7 @@ class MMPDataSet(dataset.DataSet):
         self.false_numerical_variables = list(set(self.ori_number_variables) - set(self.true_numerical_variables))  # 不具有实际意义的数值型数据
 
         self.category_as_number = self.false_numerical_variables + self.ori_category_variables
+        self.date_dict = np.load(config.VERSION_TIME_DICT_PATH)[()]
 
         # self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
         # self.label_encoded_variables = [c for c in self.df_all.columns
@@ -193,6 +194,87 @@ class MMPDataSet(dataset.DataSet):
         ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
         self.df_all = ohe.transform(self.df_all)
 
+    def generate_feature(self):
+        """
+        生成新特征
+        :return:
+        """
+        # Week
+        first = datetime(2018, 1, 1)
+        datedict2 = {}
+        for x in self.date_dict: datedict2[x] = (self.date_dict[x] - first).days // 7
+        self.df_all['Week'] = self.df_all['AvSigVersion'].map(datedict2)
+
+        self.df_all['EngineVersion_2'] = self.df_all['EngineVersion'].apply(lambda x: x.split('.')[2]).astype(
+            'category')
+        self.df_all['EngineVersion_3'] = self.df_all['EngineVersion'].apply(lambda x: x.split('.')[3]).astype(
+            'category')
+
+        self.df_all['AppVersion_1'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[1]).astype('category')
+        self.df_all['AppVersion_2'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[2]).astype('category')
+        self.df_all['AppVersion_3'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[3]).astype('category')
+
+        self.df_all['AvSigVersion_0'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[0]).astype('category')
+        self.df_all['AvSigVersion_1'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[1]).astype('category')
+        self.df_all['AvSigVersion_2'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[2]).astype('category')
+
+        # self.df_all['OsBuildLab_0'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[0]).astype('category')
+        # self.df_all['OsBuildLab_1'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[1]).astype('category')
+        # self.df_all['OsBuildLab_2'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[2]).astype('category')
+        # self.df_all['OsBuildLab_3'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[3]).astype('category')
+        # self.df_all['OsBuildLab_40'] = self.df_all['OsBuildLab'].apply(lambda x: x.split('.')[4].split('-')[0]).astype('category')
+        # self.df_all['OsBuildLab_41'] = self.df_all['OsBuildLab'].apply(lambda x: x.split('.')[4].split('-')[1]).astype('category')
+
+        self.df_all['Census_OSVersion_0'] = self.df_all['Census_OSVersion'].apply(lambda x: x.split('.')[0]).astype(
+            'category')
+        self.df_all['Census_OSVersion_1'] = self.df_all['Census_OSVersion'].apply(lambda x: x.split('.')[1]).astype(
+            'category')
+        self.df_all['Census_OSVersion_2'] = self.df_all['Census_OSVersion'].apply(lambda x: x.split('.')[2]).astype(
+            'category')
+        self.df_all['Census_OSVersion_3'] = self.df_all['Census_OSVersion'].apply(lambda x: x.split('.')[3]).astype(
+            'category')
+
+        # https://www.kaggle.com/adityaecdrid/simple-feature-engineering-xd
+        self.df_all['primary_drive_c_ratio'] = self.df_all['Census_SystemVolumeTotalCapacity'] / self.df_all[
+            'Census_PrimaryDiskTotalCapacity']
+        self.df_all['non_primary_drive_MB'] = self.df_all['Census_PrimaryDiskTotalCapacity'] - self.df_all[
+            'Census_SystemVolumeTotalCapacity']
+
+        self.df_all['aspect_ratio'] = self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] / self.df_all[
+            'Census_InternalPrimaryDisplayResolutionVertical']
+
+        self.df_all['monitor_dims'] = self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'].astype(
+            str) + '*' + self.df_all[
+                                          'Census_InternalPrimaryDisplayResolutionVertical'].astype('str')
+        self.df_all['monitor_dims'] = self.df_all['monitor_dims'].astype('category')
+
+        self.df_all['dpi'] = ((self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] ** 2 + self.df_all[
+            'Census_InternalPrimaryDisplayResolutionVertical'] ** 2) ** .5) / (
+                                 self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'])
+
+        self.df_all['dpi_square'] = self.df_all['dpi'] ** 2
+
+        self.df_all['MegaPixels'] = (self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] * self.df_all[
+            'Census_InternalPrimaryDisplayResolutionVertical']) / 1e6
+
+        self.df_all['Screen_Area'] = (self.df_all['aspect_ratio'] * (
+                    self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'] ** 2)) / (
+                                             self.df_all['aspect_ratio'] ** 2 + 1)
+
+        self.df_all['ram_per_processor'] = self.df_all['Census_TotalPhysicalRAM'] / self.df_all[
+            'Census_ProcessorCoreCount']
+
+        self.df_all['new_num_0'] = self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'] / self.df_all[
+            'Census_ProcessorCoreCount']
+
+        self.df_all['new_num_1'] = self.df_all['Census_ProcessorCoreCount'] * self.df_all[
+            'Census_InternalPrimaryDiagonalDisplaySizeInInches']
+
+        self.df_all['Census_IsFlightingInternal'] = self.df_all['Census_IsFlightingInternal'].fillna(1)
+        self.df_all['Census_ThresholdOptIn'] = self.df_all['Census_ThresholdOptIn'].fillna(1)
+        self.df_all['Census_IsWIMBootEnabled'] = self.df_all['Census_IsWIMBootEnabled'].fillna(1)
+        self.df_all['Wdft_IsGamer'] = self.df_all['Wdft_IsGamer'].fillna(0)
+
 
 def feature_engineer(save_feature=True):
     mmp_config = config.Config()
@@ -259,6 +341,7 @@ def feature_engineer_sparse_matrix():
     del df_train
     del df_test
 
+    dataset.generate_feature()
     dataset.one_hot_encoding()
 
     print('%d features are used in train' % dataset.df_all.shape[1])

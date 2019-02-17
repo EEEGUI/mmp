@@ -25,6 +25,8 @@ class Config(object):
 
     LIGHTGBM_BEST_PARAM = 'assets/lightgbm_param.json'
 
+    VERSION_TIME_DICT_PATH = 'data/raw/AvSigVersionTimestamps.npy'
+
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
     NROWS = 10000
