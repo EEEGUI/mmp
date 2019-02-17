@@ -204,7 +204,7 @@ class Config(object):
                 'metric': 'auc',
                 'learning_rate': 0.05,
                 'max_depth': -1,
-                'num_leaves': 110,
+                'num_leaves': 128,
                 'sub_feature': 0.25,
                 'sub_row': 0.8,
                 'bagging_freq': 1,
