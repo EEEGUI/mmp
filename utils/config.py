@@ -28,7 +28,7 @@ class Config(object):
     ##  DataSet ##
     LABEL_COL_NAME = 'HasDetections'
     NROWS = 10000
-    RANDOM_SAMPLE_PERCENTAGE = 0.1  # 训练集使用比例
+    RANDOM_SAMPLE_PERCENTAGE = 1  # 训练集使用比例
     KEY = 'MachineIdentifier'
     DTYPES = {
                 'MachineIdentifier':                                    'category',
@@ -175,7 +175,8 @@ class Config(object):
     #          "random_state": 133,
     #          "verbosity": -1}
 
-    PARAM = {
+    # 0.689
+    PARAM1 = {
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
                 'metric': 'auc',
@@ -194,7 +195,28 @@ class Config(object):
                 'early_stopping_rounds': 200
              }
 
-    SPARSE_MATRIX_PARAM = {
+    #
+    PARAM2 = {
+                'boosting_type': 'gbdt',
+                'objective': 'binary',
+                'metric': 'auc',
+                'learning_rate': 0.05,
+                'max_depth': -1,
+                'num_leaves': 110,
+                'sub_feature': 0.25,
+                'sub_row': 0.8,
+                'bagging_freq': 1,
+                'lambda_l1': 0.2,
+                'lambda_l2': 0.2,
+                'random_state': 133,
+                'verbosity': -1,
+                'score': 0.5,
+                'num_boost_round': 10000,
+                'early_stopping_rounds': 100
+             }
+
+    # 0.692
+    PARAM = {
                             'max_depth': -1,
                             'metric': 'auc',
                             'n_estimators': 30000,

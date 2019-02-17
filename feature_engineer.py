@@ -6,6 +6,7 @@ from tqdm import tqdm
 import pandas_profiling as pdf
 import warnings
 from utils.feature_selector import FeatureSelector
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 
 
 warnings.filterwarnings('ignore')
@@ -153,6 +154,45 @@ class MMPDataSet(dataset.DataSet):
         if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (
                     start_mem - end_mem) / start_mem))
 
+    def one_hot_encoding(self):
+        for usecol in tqdm(self.df_all.columns.tolist()[1:]):
+            self.df_all[usecol] = self.df_all[usecol].astype('str')
+
+            # Fit LabelEncoder
+            le = LabelEncoder().fit(
+                np.unique(self.df_all[usecol].unique().tolist()))
+
+            # At the end 0 will be used for dropped values
+            self.df_all[usecol] = le.transform(self.df_all[usecol]) + 1
+
+            agg_tr = (self.get_df_train()
+                      .groupby([usecol])
+                      .aggregate({'MachineIdentifier': 'count'})
+                      .reset_index()
+                      .rename({'MachineIdentifier': 'Train'}, axis=1))
+            agg_te = (self.get_df_test()
+                      .groupby([usecol])
+                      .aggregate({'MachineIdentifier': 'count'})
+                      .reset_index()
+                      .rename({'MachineIdentifier': 'Test'}, axis=1))
+
+            agg = pd.merge(agg_tr, agg_te, on=usecol, how='outer').replace(np.nan, 0)
+            # Select values with more than 1000 observations
+            agg = agg[(agg['Train'] > 500)].reset_index(drop=True)
+            agg['Total'] = agg['Train'] + agg['Test']
+            # Drop unbalanced values
+            agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
+            agg[usecol + 'Copy'] = agg[usecol]
+
+            self.df_all[usecol] = (pd.merge(self.df_all[[usecol]],
+                                      agg[[usecol, usecol + 'Copy']],
+                                      on=usecol, how='left')[usecol + 'Copy']
+                             .replace(np.nan, 0).astype('int').astype('category'))
+            del le, agg_tr, agg_te, agg, usecol
+        self.drop_key()
+        ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
+        self.df_all = ohe.transform(self.df_all)
+
 
 def feature_engineer(save_feature=True):
     mmp_config = config.Config()
@@ -202,6 +242,35 @@ def feature_engineer(save_feature=True):
     return dataset.get_df_train(), dataset.get_df_test(), dataset.get_label()
 
 
+def feature_engineer_sparse_matrix():
+    mmp_config = config.Config()
+    print('Reading train.h5...')
+    df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
+    if mmp_config.RANDOM_SAMPLE_PERCENTAGE:
+        df_train = df_train.sample(frac=mmp_config.RANDOM_SAMPLE_PERCENTAGE, random_state=mmp_config.RANDOM_STATE)
+
+    df_train_length = len(df_train)
+    print('Reading test.h5...')
+    df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
+    df_test_length = len(df_test)
+
+    dataset = MMPDataSet(df_train, df_test, mmp_config)
+
+    del df_train
+    del df_test
+
+    dataset.one_hot_encoding()
+
+    print('%d features are used in train' % dataset.df_all.shape[1])
+    print('The length of train is %d' % df_train_length)
+    print('The length of test is %d' % df_test_length)
+
+    # dataset.reduce_memory_usage()
+
+    return dataset.df_all[:dataset.len_train], dataset.df_all[dataset.len_train:], dataset.get_label()
+
+
+
 def convert_format():
     mmp_config = config.Config()
     print('Reading train.csv...')
@@ -246,4 +315,5 @@ def feature_report():
 if __name__ == '__main__':
     # convert_format()
     with timer('Feature Engineering '):
-        feature_engineer(save_feature=True)
+        # feature_engineer(save_feature=True)
+        feature_engineer_sparse_matrix()

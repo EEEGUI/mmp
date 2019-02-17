@@ -215,7 +215,7 @@ for train_index, test_index in skf.split(train_ids, y_train):
     del train
     gc.collect()
 
-    lgb_model = lgb.train(mmpconfig.SPARSE_MATRIX_PARAM, lgb_train, valid_sets=[lgb_train, lgb_eval])
+    lgb_model = lgb.train(mmpconfig.PARAM, lgb_train, valid_sets=[lgb_train, lgb_eval])
 
     # lgb_model = lgb.LGBMClassifier(max_depth=-1,
     #                                n_estimators=30000,
