@@ -16,7 +16,7 @@ def blend_predictions(predict_list, one_prediction):
 
     one_prediction["HasDetections"] = predictions
     one_prediction.to_csv('super_blend.csv', index=False)
-    one_prediction.to_csv('super_blend.csv.zip', index=False, compression=True)
+    one_prediction.to_csv('super_blend.csv.zip', index=False, compression='zip')
 
 
 if __name__ == '__main__':
