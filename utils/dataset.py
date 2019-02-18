@@ -13,9 +13,7 @@ class DataSet(object):
         self.len_train = len(df_train)
         self.len_test = len(df_test)
         self.label = df_train[config.LABEL_COL_NAME]
-
         df_train = self.drop_cols(df_train, [config.LABEL_COL_NAME])
-
         self.df_all = pd.concat([df_train, df_test], ignore_index=True)
         self.config = config
 

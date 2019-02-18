@@ -16,7 +16,7 @@ class LGBM:
         self.test_features = test_features
         self.config = config
         self.feature_importance = None
-        self.use_sparse_matrix = True if train_features.format == 'csr' else False
+        self.use_sparse_matrix = False if isinstance(train_features, pd.DataFrame) else True
 
     def k_fold_train(self, **kwargs):
         k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)

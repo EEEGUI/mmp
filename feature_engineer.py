@@ -16,31 +16,12 @@ class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
 
-        self.ori_number_variables = [v for v in self.df_all if config.DTYPES[v] in config.NUMBER_TYPE]   # 原始数据即为数值型
-        self.ori_category_variables = [v for v in self.df_all if config.DTYPES[v] not in config.NUMBER_TYPE]  # 原始数据不为数值型
-
         self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS   # 具有实际意义的数值型字段
-        self.false_numerical_variables = list(set(self.ori_number_variables) - set(self.true_numerical_variables))  # 不具有实际意义的数值型数据
-
-        self.category_as_number = self.false_numerical_variables + self.ori_category_variables
         self.date_dict = np.load(config.VERSION_TIME_DICT_PATH)[()]
 
-        # self.frequency_encoded_variables = config.FREQUENT_ENCODED_COLUMNS
-        # self.label_encoded_variables = [c for c in self.df_all.columns
-        #                                 if (c not in self.true_numerical_variables) &
-        #                                 (c not in self.frequency_encoded_variables) &
-        #                                 (c != self.config.KEY)]
-        # self.category_variables = self.frequency_encoded_variables + self.label_encoded_variables
-        #
-        # self.label_encoded_variables = self.ori_category_variables
-
-    def category_to_number(self):
-        """
-        将类别型数据作为数值型，作为新特征
-        :return:
-        """
-        for variable in self.category_as_number:
-            self.df_all['cateasnum_' + variable] = self.df_all[variable]
+        self.df_all['AvSigVersion'] = self.df_all['AvSigVersion'].map(self.date_dict)
+        self.df_all.iloc[:self.len_train, :] = self.df_all.iloc[:self.len_train, :].sort_values(by='AvSigVersion',
+                                                                                                ascending=False)
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -55,14 +36,6 @@ class MMPDataSet(dataset.DataSet):
         for variable in tqdm(cols_to_encode):
             freq_enc_dict = self._frequency_encoding(variable)
             self.df_all[variable] = self.df_all[variable].map(lambda x: freq_enc_dict.get(x, np.nan))
-
-    def category_encoding(self):
-        """
-        给不同类别编码, 编成0, 1, 2, 3 ...的形式, 一个类别对应一个数字
-        :return:
-        """
-        # self.frequent_encoding(self.frequency_encoded_variables)
-        self.label_encoding(self.ori_category_variables)
 
     def cal_category_frequency(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -109,11 +82,7 @@ class MMPDataSet(dataset.DataSet):
         删除部分特征后，维护当前最新的类别特征和数值型特征，防止出现key error
         :return:
         """
-        self.ori_category_variables = list(set(self.ori_category_variables) - set(cols_to_drop))
-        self.ori_number_variables = list(set(self.ori_number_variables) - set(cols_to_drop))
-        self.category_as_number = list(set(self.category_as_number) - set(cols_to_drop))
         self.true_numerical_variables = list(set(self.true_numerical_variables) - set(cols_to_drop))
-        self.false_numerical_variables = list(set(self.false_numerical_variables) - set(cols_to_drop))
 
     def find_useless_feature(self):
         fs = FeatureSelector(data=self.get_df_train(), labels=self.get_label())
@@ -155,7 +124,12 @@ class MMPDataSet(dataset.DataSet):
         if verbose: print('Mem. usage decreased to {:5.2f} Mb ({:.1f}% reduction)'.format(end_mem, 100 * (
                     start_mem - end_mem) / start_mem))
 
-    def one_hot_encoding(self):
+    def feature_alignment(self):
+        """
+        将样本数目少的类别归为一类
+        对齐训练集和测试集特征各类别的频率分布，将分布差别大的类别归为一类
+        :return:
+        """
         for usecol in tqdm(self.df_all.columns.tolist()[1:]):
             self.df_all[usecol] = self.df_all[usecol].astype('str')
 
@@ -179,7 +153,7 @@ class MMPDataSet(dataset.DataSet):
 
             agg = pd.merge(agg_tr, agg_te, on=usecol, how='outer').replace(np.nan, 0)
             # Select values with more than 1000 observations
-            agg = agg[(agg['Train'] > 500)].reset_index(drop=True)
+            agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
             agg['Total'] = agg['Train'] + agg['Test']
             # Drop unbalanced values
             agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
@@ -191,6 +165,8 @@ class MMPDataSet(dataset.DataSet):
                              .replace(np.nan, 0).astype('int').astype('category'))
             del le, agg_tr, agg_te, agg, usecol
         self.drop_key()
+
+    def one_hot_encoding(self):
         ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
         self.df_all = ohe.transform(self.df_all)
 
@@ -342,6 +318,7 @@ def feature_engineer_sparse_matrix():
     del df_test
 
     dataset.generate_feature()
+    dataset.feature_alignment()
     dataset.one_hot_encoding()
 
     print('%d features are used in train' % dataset.df_all.shape[1])
@@ -351,7 +328,6 @@ def feature_engineer_sparse_matrix():
     # dataset.reduce_memory_usage()
 
     return dataset.df_all[:dataset.len_train], dataset.df_all[dataset.len_train:], dataset.get_label()
-
 
 
 def convert_format():
