@@ -198,14 +198,14 @@ class Config(object):
              }
 
     #
-    PARAM2 = {
+    PARAM = {
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
                 'metric': 'auc',
                 'learning_rate': 0.05,
                 'max_depth': -1,
-                'num_leaves': 128,
-                'sub_feature': 0.25,
+                'num_leaves': 2**12-1,
+                'sub_feature': 0.28,
                 'sub_row': 0.8,
                 'bagging_freq': 1,
                 'lambda_l1': 0.2,
@@ -213,12 +213,12 @@ class Config(object):
                 'random_state': 133,
                 'verbosity': -1,
                 'score': 0.5,
-                'num_boost_round': 10000,
+                'num_boost_round': 30000,
                 'early_stopping_rounds': 100
              }
 
-    # 0.692
-    PARAM = {
+    # 0.693
+    PARAM2 = {
                             'max_depth': -1,
                             'metric': 'auc',
                             'n_estimators': 30000,
