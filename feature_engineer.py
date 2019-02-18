@@ -20,8 +20,9 @@ class MMPDataSet(dataset.DataSet):
         self.date_dict = np.load(config.VERSION_TIME_DICT_PATH)[()]
 
         self.df_all['AvSigVersion'] = self.df_all['AvSigVersion'].map(self.date_dict)
+        self.df_all['AvSigVersion'] = pd.to_datetime(self.df_all['AvSigVersion'])
         self.df_all.iloc[:self.len_train, :] = self.df_all.iloc[:self.len_train, :].sort_values(by='AvSigVersion',
-                                                                                                ascending=False)
+                                                                                                ascending=False).values
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()

@@ -11,6 +11,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import log_loss, roc_auc_score
 from deepctr.models import DeepFM,xDeepFM
 from deepctr import SingleFeat
+from utils import config
 
 
 dtypes = {
@@ -99,10 +100,17 @@ dtypes = {
     'HasDetections':                                        'int8'
     }
 print('Loading Train and Test Data.\n')
-train = pd.read_csv('data/raw/train.csv', dtype=dtypes, low_memory=True)
+mmp_config = config.Config()
+print('Reading train.h5...')
+train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
+
+print('Reading test.h5...')
+test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
+
+# train = pd.read_csv('data/raw/train.csv', dtype=dtypes, low_memory=True)
 train['MachineIdentifier'] = train.index.astype('uint32')
 train_size = train.shape[0]
-test  = pd.read_csv('data/raw/test.csv', dtype=dtypes, low_memory=True)
+# test  = pd.read_csv('data/raw/test.csv', dtype=dtypes, low_memory=True)
 test['MachineIdentifier']  = test.index.astype('uint32')
 test['HasDetections']=[0]*len(test)
 data = pd.concat([train,test])
