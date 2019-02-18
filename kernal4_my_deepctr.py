@@ -99,10 +99,10 @@ dtypes = {
     'HasDetections':                                        'int8'
     }
 print('Loading Train and Test Data.\n')
-train = pd.read_csv('data/raw/train.csv',nrows=1000, dtype=dtypes, low_memory=True)
+train = pd.read_csv('data/raw/train.csv', dtype=dtypes, low_memory=True)
 train['MachineIdentifier'] = train.index.astype('uint32')
 train_size = train.shape[0]
-test  = pd.read_csv('data/raw/test.csv',nrows=1000, dtype=dtypes, low_memory=True)
+test  = pd.read_csv('data/raw/test.csv', dtype=dtypes, low_memory=True)
 test['MachineIdentifier']  = test.index.astype('uint32')
 test['HasDetections']=[0]*len(test)
 data = pd.concat([train,test])
@@ -155,12 +155,12 @@ model.compile("adam", "binary_crossentropy",
               metrics=['binary_crossentropy'], )
 
 history = model.fit(train_model_input, train[target].values,
-                    batch_size=256, epochs=5, verbose=2, validation_split=0.2, )
-pred_ans = model.predict(test_model_input, batch_size=256)
+                    batch_size=4096, epochs=5, verbose=2, validation_split=0.2, )
+pred_ans = model.predict(test_model_input, batch_size=2**19)
 #print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
 #print("test AUC", round(roc_auc_score(train[target].values, pred_ans), 4))
 
-submission = pd.read_csv('data/raw/sample_submission.csv',nrows=1000)
+submission = pd.read_csv('data/raw/sample_submission.csv')
 submission['HasDetections'] = pred_ans
 #print(submission['HasDetections'].head())
 submission.to_csv('nffm_submission.csv', index=False)
