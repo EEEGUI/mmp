@@ -198,7 +198,7 @@ class Config(object):
              }
 
     #
-    PARAM = {
+    PARAM2 = {
                 'boosting_type': 'gbdt',
                 'objective': 'binary',
                 'metric': 'auc',
@@ -218,7 +218,7 @@ class Config(object):
              }
 
     # 0.693
-    PARAM2 = {
+    PARAM = {
                             'max_depth': -1,
                             'metric': 'auc',
                             'n_estimators': 30000,

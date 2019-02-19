@@ -7,6 +7,7 @@ import pandas_profiling as pdf
 import warnings
 from utils.feature_selector import FeatureSelector
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
+from scipy.sparse import csr_matrix
 
 
 warnings.filterwarnings('ignore')
@@ -15,14 +16,18 @@ warnings.filterwarnings('ignore')
 class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
-
-        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS   # 具有实际意义的数值型字段
         self.date_dict = np.load(config.VERSION_TIME_DICT_PATH)[()]
 
-        self.df_all['AvSigVersion'] = self.df_all['AvSigVersion'].map(self.date_dict)
-        self.df_all['AvSigVersion'] = pd.to_datetime(self.df_all['AvSigVersion'])
-        self.df_all.iloc[:self.len_train, :] = self.df_all.iloc[:self.len_train, :].sort_values(by='AvSigVersion',
-                                                                                                ascending=True).values
+        df_train['DateFromVersion'] = df_train['AvSigVersion'].map(self.date_dict)
+        df_train = df_train.sort_values(by='DateFromVersion', ascending=True)
+        self.label = df_train[config.LABEL_COL_NAME]
+        df_train = self.drop_cols(df_train, [config.LABEL_COL_NAME, 'DateFromVersion'])
+
+        self.df_all = pd.concat([df_train, df_test], ignore_index=True).reset_index(drop=True)
+        self.config = config
+
+        self.true_numerical_variables = config.TRUE_NUMERICAL_COLUMNS   # 具有实际意义的数值型字段
+        self.category_variables = [col for col in self.df_all.columns if col not in self.true_numerical_variables]
 
     def _frequency_encoding(self, variable):
         t = self.df_all[variable].value_counts().reset_index()
@@ -84,6 +89,7 @@ class MMPDataSet(dataset.DataSet):
         :return:
         """
         self.true_numerical_variables = list(set(self.true_numerical_variables) - set(cols_to_drop))
+        self.category_variables = list(set(self.category_variables) - set(cols_to_drop))
 
     def find_useless_feature(self):
         fs = FeatureSelector(data=self.get_df_train(), labels=self.get_label())
@@ -131,7 +137,7 @@ class MMPDataSet(dataset.DataSet):
         对齐训练集和测试集特征各类别的频率分布，将分布差别大的类别归为一类
         :return:
         """
-        for usecol in tqdm(self.df_all.columns.tolist()[1:]):
+        for usecol in tqdm(self.category_variables[1:]):
             self.df_all[usecol] = self.df_all[usecol].astype('str')
 
             # Fit LabelEncoder
@@ -168,8 +174,12 @@ class MMPDataSet(dataset.DataSet):
         self.drop_key()
 
     def one_hot_encoding(self):
-        ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
-        self.df_all = ohe.transform(self.df_all)
+        # ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
+        ohe = OneHotEncoder(categories='auto', sparse=False, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
+        # self.df_all = ohe.transform(self.df_all)
+        array_category = ohe.transform(self.df_all.loc[:, self.category_variables])
+        self.df_all = pd.concat([self.df_all[self.true_numerical_variables], pd.DataFrame(array_category)], axis=1)
+        self.df_all = csr_matrix(self.df_all)
 
     def generate_feature(self):
         """
@@ -181,20 +191,23 @@ class MMPDataSet(dataset.DataSet):
         datedict2 = {}
         for x in self.date_dict: datedict2[x] = (self.date_dict[x] - first).days // 7
         self.df_all['Week'] = self.df_all['AvSigVersion'].map(datedict2)
+        self.true_numerical_variables.append('Week')
 
         self.df_all['EngineVersion_2'] = self.df_all['EngineVersion'].apply(lambda x: x.split('.')[2]).astype(
             'category')
         self.df_all['EngineVersion_3'] = self.df_all['EngineVersion'].apply(lambda x: x.split('.')[3]).astype(
             'category')
+        self.category_variables += ['EngineVersion_2', 'EngineVersion_3']
 
         self.df_all['AppVersion_1'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[1]).astype('category')
         self.df_all['AppVersion_2'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[2]).astype('category')
         self.df_all['AppVersion_3'] = self.df_all['AppVersion'].apply(lambda x: x.split('.')[3]).astype('category')
+        self.category_variables += ['AppVersion_1', 'AppVersion_2', 'AppVersion_3']
 
         self.df_all['AvSigVersion_0'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[0]).astype('category')
         self.df_all['AvSigVersion_1'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[1]).astype('category')
         self.df_all['AvSigVersion_2'] = self.df_all['AvSigVersion'].apply(lambda x: x.split('.')[2]).astype('category')
-
+        self.category_variables += ['AvSigVersion_0', 'AvSigVersion_1', 'AvSigVersion_2']
         # self.df_all['OsBuildLab_0'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[0]).astype('category')
         # self.df_all['OsBuildLab_1'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[1]).astype('category')
         # self.df_all['OsBuildLab_2'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[2]).astype('category')
@@ -210,95 +223,60 @@ class MMPDataSet(dataset.DataSet):
             'category')
         self.df_all['Census_OSVersion_3'] = self.df_all['Census_OSVersion'].apply(lambda x: x.split('.')[3]).astype(
             'category')
+        self.category_variables += ['Census_OSVersion_0', 'Census_OSVersion_1', 'Census_OSVersion_2', 'Census_OSVersion_3']
 
         # https://www.kaggle.com/adityaecdrid/simple-feature-engineering-xd
         self.df_all['primary_drive_c_ratio'] = self.df_all['Census_SystemVolumeTotalCapacity'] / self.df_all[
             'Census_PrimaryDiskTotalCapacity']
+        self.true_numerical_variables += ['primary_drive_c_ratio']
+
         self.df_all['non_primary_drive_MB'] = self.df_all['Census_PrimaryDiskTotalCapacity'] - self.df_all[
             'Census_SystemVolumeTotalCapacity']
+        self.true_numerical_variables += ['non_primary_drive_MB']
 
         self.df_all['aspect_ratio'] = self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] / self.df_all[
             'Census_InternalPrimaryDisplayResolutionVertical']
+        self.true_numerical_variables += ['aspect_ratio']
 
         self.df_all['monitor_dims'] = self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'].astype(
-            str) + '*' + self.df_all[
-                                          'Census_InternalPrimaryDisplayResolutionVertical'].astype('str')
+            str) + '*' + self.df_all['Census_InternalPrimaryDisplayResolutionVertical'].astype('str')
+
         self.df_all['monitor_dims'] = self.df_all['monitor_dims'].astype('category')
+        self.category_variables += ['monitor_dims']
 
         self.df_all['dpi'] = ((self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] ** 2 + self.df_all[
             'Census_InternalPrimaryDisplayResolutionVertical'] ** 2) ** .5) / (
                                  self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'])
+        self.true_numerical_variables += ['dpi']
 
         self.df_all['dpi_square'] = self.df_all['dpi'] ** 2
+        self.true_numerical_variables += ['dpi_square']
 
         self.df_all['MegaPixels'] = (self.df_all['Census_InternalPrimaryDisplayResolutionHorizontal'] * self.df_all[
             'Census_InternalPrimaryDisplayResolutionVertical']) / 1e6
+        self.true_numerical_variables += ['MegaPixels']
 
         self.df_all['Screen_Area'] = (self.df_all['aspect_ratio'] * (
                     self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'] ** 2)) / (
                                              self.df_all['aspect_ratio'] ** 2 + 1)
+        self.true_numerical_variables += ['Screen_Area']
 
         self.df_all['ram_per_processor'] = self.df_all['Census_TotalPhysicalRAM'] / self.df_all[
             'Census_ProcessorCoreCount']
+        self.true_numerical_variables += ['ram_per_processor']
 
         self.df_all['new_num_0'] = self.df_all['Census_InternalPrimaryDiagonalDisplaySizeInInches'] / self.df_all[
             'Census_ProcessorCoreCount']
+        self.true_numerical_variables += ['new_num_0']
 
         self.df_all['new_num_1'] = self.df_all['Census_ProcessorCoreCount'] * self.df_all[
             'Census_InternalPrimaryDiagonalDisplaySizeInInches']
+        self.true_numerical_variables += ['new_num_1']
 
         self.df_all['Census_IsFlightingInternal'] = self.df_all['Census_IsFlightingInternal'].fillna(1)
         self.df_all['Census_ThresholdOptIn'] = self.df_all['Census_ThresholdOptIn'].fillna(1)
         self.df_all['Census_IsWIMBootEnabled'] = self.df_all['Census_IsWIMBootEnabled'].fillna(1)
         self.df_all['Wdft_IsGamer'] = self.df_all['Wdft_IsGamer'].fillna(0)
-
-
-def feature_engineer(save_feature=True):
-    mmp_config = config.Config()
-    print('Reading train.h5...')
-    df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
-    if mmp_config.RANDOM_SAMPLE_PERCENTAGE:
-        df_train = df_train.sample(frac=mmp_config.RANDOM_SAMPLE_PERCENTAGE, random_state=mmp_config.RANDOM_STATE)
-
-    df_train_length = len(df_train)
-    print('Reading test.h5...')
-    df_test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
-    df_test_length = len(df_test)
-
-    dataset = MMPDataSet(df_train, df_test, mmp_config)
-
-    del df_train
-    del df_test
-
-    # print('Split feature...')
-    # dataset.split_feature()
-
-    print('Drop features')
-    dataset.drop_key()
-    # dataset.drop_features()
-
-    # print('Generate new feature')
-    # dataset.category_to_frequent()
-
-    # print('Label encoding...')
-    # dataset.category_encoding()
-
-    print('Category to number...')
-    dataset.category_encoding()
-    dataset.category_to_number()
-
-    print('%d features are used in train' % dataset.df_all.shape[1])
-    print('The length of train is %d' % df_train_length)
-    print('The length of test is %d' % df_test_length)
-
-    dataset.reduce_memory_usage()
-
-    if save_feature:
-        dataset.get_df_train().to_hdf(mmp_config.TRAIN_FEATURE_PATH, key='data', format='t')
-        dataset.get_df_test().to_hdf(mmp_config.TEST_FEATURE_PATH, key='data', format='t')
-        dataset.get_label().to_hdf(mmp_config.LABEL_PATH, key='data', format='t')
-
-    return dataset.get_df_train(), dataset.get_df_test(), dataset.get_label()
 
 
 def feature_engineer_sparse_matrix():

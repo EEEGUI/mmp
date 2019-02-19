@@ -3,7 +3,7 @@ from utils.model import LGBM
 from utils.utils import *
 import pandas as pd
 import warnings
-from feature_engineer import feature_engineer, feature_engineer_sparse_matrix
+from feature_engineer import feature_engineer_sparse_matrix
 
 warnings.filterwarnings('ignore', category=Warning)
 
