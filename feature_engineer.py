@@ -7,7 +7,7 @@ import pandas_profiling as pdf
 import warnings
 from utils.feature_selector import FeatureSelector
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
-from scipy.sparse import csr_matrix
+from scipy.sparse import csr_matrix, hstack
 
 
 warnings.filterwarnings('ignore')
@@ -175,10 +175,11 @@ class MMPDataSet(dataset.DataSet):
 
     def one_hot_encoding(self):
         # ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
-        ohe = OneHotEncoder(categories='auto', sparse=False, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
+        ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
         # self.df_all = ohe.transform(self.df_all)
         array_category = ohe.transform(self.df_all.loc[:, self.category_variables])
-        self.df_all = pd.concat([self.df_all[self.true_numerical_variables], pd.DataFrame(array_category)], axis=1)
+        # self.df_all = pd.concat([self.df_all[self.true_numerical_variables], pd.DataFrame(array_category)], axis=1)
+        self.df_all = hstack([array_category, csr_matrix(self.df_all[self.true_numerical_variables])])
         self.df_all = csr_matrix(self.df_all)
 
     def generate_feature(self):

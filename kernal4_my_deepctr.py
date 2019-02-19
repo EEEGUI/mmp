@@ -161,10 +161,11 @@ model = xDeepFM({"sparse": sparse_feature_list,
                 "dense": dense_feature_list}, final_activation='sigmoid')
 model.compile("adam", "binary_crossentropy",
               metrics=['binary_crossentropy'], )
-
+# 4096
+# 2**19
 history = model.fit(train_model_input, train[target].values,
-                    batch_size=4096, epochs=5, verbose=2, validation_split=0.2, )
-pred_ans = model.predict(test_model_input, batch_size=2**19)
+                    batch_size=256, epochs=5, verbose=2, validation_split=0.2, )
+pred_ans = model.predict(test_model_input, batch_size=2**8)
 #print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
 #print("test AUC", round(roc_auc_score(train[target].values, pred_ans), 4))
 
