@@ -4,6 +4,7 @@ import pandas as pd
 import os
 from datetime import datetime
 import json
+import psutil
 
 
 @contextmanager
@@ -50,6 +51,16 @@ def read_json(path):
     with open(path, 'r') as f:
         dict_ = json.load(f)
         return dict_
+
+
+def get_memory_state():
+        phymem = psutil.virtual_memory()
+        line = "Memory: %5s%% %6s/%s"%(
+            phymem.percent,
+            str(int(phymem.used/1024/1024))+"M",
+            str(int(phymem.total/1024/1024))+"M"
+            )
+        return line
 
 
 

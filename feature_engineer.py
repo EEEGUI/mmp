@@ -8,6 +8,7 @@ import warnings
 from utils.feature_selector import FeatureSelector
 from sklearn.preprocessing import LabelEncoder, OneHotEncoder
 from scipy.sparse import csr_matrix, hstack
+from utils.utils import get_memory_state
 
 
 warnings.filterwarnings('ignore')
@@ -281,6 +282,7 @@ class MMPDataSet(dataset.DataSet):
 
 
 def feature_engineer_sparse_matrix():
+    print('Before load data - ', get_memory_state())
     mmp_config = config.Config()
     print('Reading train.h5...')
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
@@ -296,11 +298,13 @@ def feature_engineer_sparse_matrix():
 
     del df_train
     del df_test
-
+    print('Loaded data - ', get_memory_state())
     dataset.generate_feature()
+    print('Generated data - ', get_memory_state())
     dataset.feature_alignment()
+    print('Feature aligned - ', get_memory_state())
     dataset.one_hot_encoding()
-
+    print('One hot encoded - ', get_memory_state())
     print('%d features are used in train' % dataset.df_all.shape[1])
     print('The length of train is %d' % df_train_length)
     print('The length of test is %d' % df_test_length)
