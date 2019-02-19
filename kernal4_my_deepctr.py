@@ -164,8 +164,8 @@ model.compile("adam", "binary_crossentropy",
 # 4096
 # 2**19
 history = model.fit(train_model_input, train[target].values,
-                    batch_size=256, epochs=5, verbose=2, validation_split=0.2, )
-pred_ans = model.predict(test_model_input, batch_size=2**8)
+                    batch_size=1024, epochs=5, verbose=2, validation_split=0.2, )
+pred_ans = model.predict(test_model_input, batch_size=2**10)
 #print("test LogLoss", round(log_loss(test[target].values, pred_ans), 4))
 #print("test AUC", round(roc_auc_score(train[target].values, pred_ans), 4))
 
