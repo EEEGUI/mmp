@@ -141,7 +141,8 @@ for usecol in train.columns.tolist()[1:-1]:
     agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
     agg['Total'] = agg['Train'] + agg['Test']
     #Drop unbalanced values
-    agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
+    agg = agg[(agg['Train'] / agg['Total'] < 0.8)]
+    # agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
     agg[usecol+'Copy'] = agg[usecol]
 
     train[usecol] = (pd.merge(train[[usecol]], 
@@ -266,7 +267,7 @@ for train_index, test_index in skf.split(train_ids, y_train):
 
 submission = pd.read_csv('data/raw/sample_submission.csv', nrows=mmpconfig.NROWS)
 submission['HasDetections'] = lgb_test_result / counter
-submission.to_csv('lgb_submission2.csv', index=False)
+submission.to_csv('lgb_submission_train_80.csv', index=False)
 #submission['HasDetections'] = xgb_test_result / counter
 #submission.to_csv('xgb_submission.csv', index=False)
 #submission['HasDetections'] = 0.5 * lgb_test_result / counter  + 0.5 * xgb_test_result / counter 
