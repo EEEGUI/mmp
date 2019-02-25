@@ -161,7 +161,7 @@ class MMPDataSet(dataset.DataSet):
 
             agg = pd.merge(agg_tr, agg_te, on=usecol, how='outer').replace(np.nan, 0)
             # Select values with more than 1000 observations
-            agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
+            agg = agg[(agg['Train'] > 500)].reset_index(drop=True)
             agg['Total'] = agg['Train'] + agg['Test']
             # Drop unbalanced values
             agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
