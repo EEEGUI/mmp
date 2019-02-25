@@ -33,3 +33,5 @@ def main():
 
 if __name__ == '__main__':
     main()
+
+# kaggle competitions submit -c microsoft-malware-prediction -f submission.csv -m "Message"

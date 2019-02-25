@@ -18,9 +18,9 @@ class MMPDataSet(dataset.DataSet):
     def __init__(self, df_train, df_test, config):
         super(MMPDataSet, self).__init__(df_train, df_test, config)
         self.date_dict = np.load(config.VERSION_TIME_DICT_PATH)[()]
-
         df_train['DateFromVersion'] = df_train['AvSigVersion'].map(self.date_dict)
-        df_train = df_train.sort_values(by='DateFromVersion', ascending=True)
+        if False:
+            df_train = df_train.sort_values(by='DateFromVersion', ascending=True)
         self.label = df_train[config.LABEL_COL_NAME]
         df_train = self.drop_cols(df_train, [config.LABEL_COL_NAME, 'DateFromVersion'])
 

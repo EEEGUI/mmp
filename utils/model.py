@@ -19,7 +19,7 @@ class LGBM:
         self.use_sparse_matrix = False if isinstance(train_features, pd.DataFrame) else True
 
     def k_fold_train(self, **kwargs):
-        k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=False, random_state=712)
+        k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         valid_scores = []
         train_scores = []
         feature_importance_values = np.zeros(self.train_features.shape[1])
