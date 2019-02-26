@@ -21,7 +21,7 @@ class LGBM:
     def k_fold_train(self, **kwargs):
         k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         valid_scores = []
-        train_scores = []
+        # train_scores = []
         feature_importance_values = np.zeros(self.train_features.shape[1])
         test_predictions = np.zeros(self.test_features.shape[0])
 
@@ -46,13 +46,13 @@ class LGBM:
                             categorical_feature=self.config.CATEGORY_VARIABLES)
             feature_importance_values += gbm.feature_importance() / k_fold.n_splits
             valid_scores.append(gbm.best_score['valid_1']['auc'])
-            train_scores.append(gbm.best_score['training']['auc'])
+            # train_scores.append(gbm.best_score['training']['auc'])
             # test_predictions += gbm.predict(self.test_features, num_iteration=gbm.best_iteration) / k_fold.n_splits
             test_predictions = np.add(test_predictions,
                                       rankdata(gbm.predict(self.test_features, num_iteration=gbm.best_iteration))
                                       / test_predictions.shape[0])
         test_predictions /= k_fold.n_splits
-        print('Average training`s AUC is %.5f, std=%.5f' % (np.mean(train_scores), np.std(train_scores)))
+        # print('Average training`s AUC is %.5f, std=%.5f' % (np.mean(train_scores), np.std(train_scores)))
         print('Average valid`s AUC is %.5f, std=%.5f' % (np.mean(valid_scores), np.std(valid_scores)))
         print('Saving model...')
         # save model to file
