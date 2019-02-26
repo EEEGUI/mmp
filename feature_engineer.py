@@ -138,7 +138,8 @@ class MMPDataSet(dataset.DataSet):
         对齐训练集和测试集特征各类别的频率分布，将分布差别大的类别归为一类
         :return:
         """
-        for usecol in tqdm(self.category_variables[1:]):
+        feature_to_process = self.category_variables[1:] + self.true_numerical_variables
+        for usecol in tqdm(feature_to_process):
             self.df_all[usecol] = self.df_all[usecol].astype('str')
 
             # Fit LabelEncoder
@@ -161,7 +162,7 @@ class MMPDataSet(dataset.DataSet):
 
             agg = pd.merge(agg_tr, agg_te, on=usecol, how='outer').replace(np.nan, 0)
             # Select values with more than 1000 observations
-            agg = agg[(agg['Train'] > 500)].reset_index(drop=True)
+            agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
             agg['Total'] = agg['Train'] + agg['Test']
             # Drop unbalanced values
             agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
@@ -175,13 +176,16 @@ class MMPDataSet(dataset.DataSet):
         self.drop_key()
 
     def one_hot_encoding(self):
-        # ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
-        ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
-        # self.df_all = ohe.transform(self.df_all)
-        array_category = ohe.transform(self.df_all.loc[:, self.category_variables])
-        # self.df_all = pd.concat([self.df_all[self.true_numerical_variables], pd.DataFrame(array_category)], axis=1)
-        self.df_all = hstack([array_category, csr_matrix(self.df_all[self.true_numerical_variables])])
-        self.df_all = csr_matrix(self.df_all)
+        one_hot_num = True  # 对数值型也one_hot
+        if one_hot_num:
+            ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
+            self.df_all = ohe.transform(self.df_all)
+        else:
+            ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
+            array_category = ohe.transform(self.df_all.loc[:, self.category_variables])
+            self.df_all = pd.concat([self.df_all[self.true_numerical_variables], pd.DataFrame(array_category)], axis=1)
+            self.df_all = hstack([array_category, csr_matrix(self.df_all[self.true_numerical_variables])])
+            self.df_all = csr_matrix(self.df_all)
 
     def generate_feature(self):
         """

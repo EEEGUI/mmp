@@ -42,7 +42,7 @@ class LGBM:
             lgb_train = lgb.Dataset(train_x, train_y)
             lgb_eval = lgb.Dataset(valid_x, valid_y)
             gbm = lgb.train(self.config.PARAM, lgb_train,
-                            valid_sets=[lgb_train, lgb_eval],
+                            valid_sets=[lgb_eval],
                             categorical_feature=self.config.CATEGORY_VARIABLES)
             feature_importance_values += gbm.feature_importance() / k_fold.n_splits
             valid_scores.append(gbm.best_score['valid_1']['auc'])
