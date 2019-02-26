@@ -45,7 +45,8 @@ class LGBM:
                             valid_sets=[lgb_eval],
                             categorical_feature=self.config.CATEGORY_VARIABLES)
             feature_importance_values += gbm.feature_importance() / k_fold.n_splits
-            valid_scores.append(gbm.best_score['valid_1']['auc'])
+            valid_scores.append(gbm.best_score['valid_0']['auc'])
+            # valid_scores.append(gbm.best_score['valid_1']['auc'])
             # train_scores.append(gbm.best_score['training']['auc'])
             # test_predictions += gbm.predict(self.test_features, num_iteration=gbm.best_iteration) / k_fold.n_splits
             test_predictions = np.add(test_predictions,
