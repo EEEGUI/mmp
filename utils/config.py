@@ -207,7 +207,6 @@ class Config(object):
                 'num_leaves': 2**7,
                 'sub_feature': 0.28,
                 'sub_row': 0.8,
-                'bagging_freq': 1,
                 'lambda_l1': 0.2,
                 'lambda_l2': 0.2,
                 'random_state': 133,
@@ -253,6 +252,8 @@ class Config(object):
     RANDOM_STATE = 712
     N_FOLDS = 5
     MODEL_SAVING_PATH = 'assets/model.pkl'
+    SAMPLES_TO_SAVE = 0.4
+    DROP_SAMPLES = True
 
 
 

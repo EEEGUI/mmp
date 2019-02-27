@@ -173,10 +173,18 @@ class MMPDataSet(dataset.DataSet):
                                       on=usecol, how='left')[usecol + 'Copy']
                              .replace(np.nan, 0).astype('int').astype('category'))
             del le, agg_tr, agg_te, agg, usecol
-        df_train_0_count = (self.get_df_train() == 0).astype(int).sum(axis=1)
-        # sample_to_drop_index = df_train_0_count[df_train_0_count < ]
 
         self.drop_key()
+
+        if self.config.DROP_SAMPLES:
+            df_train_0_count = (self.get_df_train() == 0).astype(int).sum(axis=1)
+            sample_to_use_index = df_train_0_count[df_train_0_count < self.config.SAMPLES_TO_SAVE * self.df_all.shape[1]].index
+            test = self.get_df_test()
+            train = self.get_df_train().iloc[sample_to_use_index]
+            self.len_train = len(train)
+            self.df_all = pd.concat([train, test], ignore_index=True).reset_index(drop=True)
+            del train, test
+            self.label = self.label.iloc[sample_to_use_index]
 
     def one_hot_encoding(self):
         one_hot_num = True  # 对数值型也one_hot
@@ -313,8 +321,8 @@ def feature_engineer_sparse_matrix():
     dataset.one_hot_encoding()
     print('One hot encoded - ', get_memory_state())
     print('%d features are used in train' % dataset.df_all.shape[1])
-    print('The length of train is %d' % df_train_length)
-    print('The length of test is %d' % df_test_length)
+    print('The length of train is %d' % dataset.len_train)
+    print('The length of test is %d' % dataset.len_test)
 
     # dataset.reduce_memory_usage()
 
