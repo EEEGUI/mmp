@@ -218,7 +218,7 @@ class Config(object):
 
     # 0.693
     PARAM = {
-                            'boosting_type': 'goss',
+                            'boosting_type': 'gbdt',
                             'max_depth': -1,
                             'metric': 'auc',
                             'n_estimators': 30000,
