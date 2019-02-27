@@ -173,6 +173,9 @@ class MMPDataSet(dataset.DataSet):
                                       on=usecol, how='left')[usecol + 'Copy']
                              .replace(np.nan, 0).astype('int').astype('category'))
             del le, agg_tr, agg_te, agg, usecol
+        df_train_0_count = (self.get_df_train() == 0).astype(int).sum(axis=1)
+        # sample_to_drop_index = df_train_0_count[df_train_0_count < ]
+
         self.drop_key()
 
     def one_hot_encoding(self):

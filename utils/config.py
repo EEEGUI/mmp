@@ -219,6 +219,7 @@ class Config(object):
 
     # 0.693
     PARAM = {
+                            'boosting_type': 'goss',
                             'max_depth': -1,
                             'metric': 'auc',
                             'n_estimators': 30000,
@@ -252,6 +253,7 @@ class Config(object):
     RANDOM_STATE = 712
     N_FOLDS = 5
     MODEL_SAVING_PATH = 'assets/model.pkl'
+
 
 
 
