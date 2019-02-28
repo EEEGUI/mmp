@@ -26,11 +26,11 @@ def main():
     for min_value, max_value in [(0.1, 0.8), (0.3, 0.8), (0.1, 0.9), (0.2, 0.9)]:
         mmpconfig.MIN = min_value
         mmpconfig.MAX = max_value
-    with timer('Feature Engineer'):
-        # train_feature, test_feature, label = feature_engineer(save_feature=True)
-        train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig)
-    with timer('Training'):
-        train(train_feature, test_feature, label, load_data=False)
+        with timer('Feature Engineer'):
+            # train_feature, test_feature, label = feature_engineer(save_feature=True)
+            train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig)
+        with timer('Training'):
+            train(train_feature, test_feature, label, load_data=False)
     # with timer('Training'):
     #     train(None, None, None, True)
 
