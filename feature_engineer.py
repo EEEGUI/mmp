@@ -165,7 +165,8 @@ class MMPDataSet(dataset.DataSet):
             agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
             agg['Total'] = agg['Train'] + agg['Test']
             # Drop unbalanced values
-            agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
+            # agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
+            agg = agg[(agg['Train'] / agg['Total'] < 0.8)]
             agg[usecol + 'Copy'] = agg[usecol]
 
             self.df_all[usecol] = (pd.merge(self.df_all[[usecol]],
