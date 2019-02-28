@@ -14,7 +14,7 @@ def timer(title):
     print("{} - done in {:.1f}mins".format(title, (time.time() - t0)/60))
 
 
-def submission(config, pred, is_compres):
+def submission(config, pred, is_compres, name=''):
     print('Generating submission...')
     now = datetime.now().strftime("%Y%m%d-%H%M%S")
     df = pd.read_csv(config.TEST_PATH, usecols=[config.KEY], nrows=len(pred))
@@ -22,9 +22,9 @@ def submission(config, pred, is_compres):
     if not os.path.exists(config.OUTPUT):
         os.mkdir(config.OUTPUT)
     if is_compres:
-        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv.zip' % now), index=False, compression='zip')
+        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s_%s.csv.zip' % (now, name)), index=False, compression='zip')
     else:
-        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s.csv' % now), index=False)
+        df.to_csv(os.path.join(config.OUTPUT, 'submission_%s_%s.csv' % (now, name)), index=False)
     # os.system('kaggle competitions submit -c microsoft-malware-prediction -f ./data/output/submission_%s.csv.zip -m "Message"' % now)
 
 

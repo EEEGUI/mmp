@@ -63,7 +63,10 @@ class LGBM:
                                                 'importance': gbm.feature_importance()})
             self.plot_feature_importance()
             print('Saving model...')
-        return test_predictions
+        del gbm
+
+        submission(self.config, test_predictions, True, '%.5f' % np.mean(valid_scores))
+
 
     def train(self):
         train_x, valid_x, train_y, valid_y = train_test_split(self.train_features, self.train_labels, test_size=0.2, random_state=712)

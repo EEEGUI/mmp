@@ -18,7 +18,7 @@ def train(train_feature, test_feature, label, load_data):
     config.CATEGORY_VARIABLES = 'auto'
     print('%d features are used for training...' % (train_feature.shape[1]))
     lgbm = LGBM(config, train_feature, label, test_feature)
-    submission(config, lgbm.k_fold_train(), True)
+    lgbm.k_fold_train()
 
 
 def main():
