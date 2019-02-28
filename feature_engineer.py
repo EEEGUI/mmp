@@ -165,8 +165,7 @@ class MMPDataSet(dataset.DataSet):
             agg = agg[(agg['Train'] > 1000)].reset_index(drop=True)
             agg['Total'] = agg['Train'] + agg['Test']
             # Drop unbalanced values
-            # agg = agg[(agg['Train'] / agg['Total'] > 0.2) & (agg['Train'] / agg['Total'] < 0.8)]
-            agg = agg[(agg['Train'] / agg['Total'] < 0.8)]
+            agg = agg[(agg['Train'] / agg['Total'] > self.config.MIN) & (agg['Train'] / agg['Total'] < self.config.MAX)]
             agg[usecol + 'Copy'] = agg[usecol]
 
             self.df_all[usecol] = (pd.merge(self.df_all[[usecol]],
@@ -297,9 +296,9 @@ class MMPDataSet(dataset.DataSet):
         self.df_all['Wdft_IsGamer'] = self.df_all['Wdft_IsGamer'].fillna(0)
 
 
-def feature_engineer_sparse_matrix():
+def feature_engineer_sparse_matrix(config):
     print('Before load data - ', get_memory_state())
-    mmp_config = config.Config()
+    mmp_config = config
     print('Reading train.h5...')
     df_train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
     if mmp_config.RANDOM_SAMPLE_PERCENTAGE:
@@ -375,4 +374,5 @@ if __name__ == '__main__':
     # convert_format()
     with timer('Feature Engineering '):
         # feature_engineer(save_feature=True)
-        feature_engineer_sparse_matrix()
+        mmp_config = config.Config()
+        feature_engineer_sparse_matrix(mmp_config)

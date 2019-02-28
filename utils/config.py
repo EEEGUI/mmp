@@ -254,6 +254,8 @@ class Config(object):
     MODEL_SAVING_PATH = 'assets/model.pkl'
     SAMPLES_TO_SAVE = 0.2
     DROP_SAMPLES = True
+    MIN = 0.2
+    MAX = 0.8
 
 
 
