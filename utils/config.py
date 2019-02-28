@@ -252,7 +252,7 @@ class Config(object):
     RANDOM_STATE = 712
     N_FOLDS = 5
     MODEL_SAVING_PATH = 'assets/model.pkl'
-    SAMPLES_TO_SAVE = 0.4
+    SAMPLES_TO_SAVE = 0.2
     DROP_SAMPLES = True
 
 
