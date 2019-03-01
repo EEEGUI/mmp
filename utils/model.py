@@ -69,7 +69,8 @@ class LGBM:
 
 
     def train(self):
-        train_x, valid_x, train_y, valid_y = train_test_split(self.train_features, self.train_labels, test_size=0.2, random_state=712)
+        train_x, valid_x, train_y, valid_y = train_test_split(self.train_features, self.train_labels, test_size=0.2,
+                                                              shuffle=False, random_state=712)
         if self.use_sparse_matrix:
             train_x, valid_x, self.test_features = csr_matrix(train_x, dtype='float32'), \
                                                    csr_matrix(valid_x, dtype='float32'), \
@@ -80,7 +81,7 @@ class LGBM:
         param = read_json(self.config.LIGHTGBM_BEST_PARAM)
         param = self.config.PARAM
         gbm = lgb.train(param, lgb_train,
-                        valid_sets=[lgb_train, lgb_eval],
+                        valid_sets=[lgb_eval],
                         categorical_feature=self.config.CATEGORY_VARIABLES)
         print('Predicting...')
         test_predictions = gbm.predict(self.test_features, num_iteration=gbm.best_iteration)
@@ -92,10 +93,12 @@ class LGBM:
                                                 'importance': gbm.feature_importance()})
             self.plot_feature_importance()
             print('Saving model...')
-
-        print('Plotting 1th tree with graphviz...')
-        graph = lgb.create_tree_digraph(gbm, tree_index=0, name='Tree1')
-        graph.render(filename='assets/tree_graph')
+        print_tree = False
+        if print_tree:
+            print('Plotting 1th tree with graphviz...')
+            graph = lgb.create_tree_digraph(gbm, tree_index=0, name='Tree1')
+            graph.render(filename='assets/tree_graph')
+        submission(self.config, test_predictions, True, '%.5f' % gbm.best_score['valid_0']['auc'])
 
         return test_predictions
 
