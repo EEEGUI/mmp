@@ -5,6 +5,9 @@ import pandas as pd
 import warnings
 from feature_engineer import feature_engineer_sparse_matrix
 import gc
+import sys
+from utils.log import Logger
+sys.stdout = Logger("log.txt", sys.stdout)
 
 warnings.filterwarnings('ignore', category=Warning)
 
@@ -21,6 +24,7 @@ def train(train_feature, test_feature, label, load_data):
     lgbm = LGBM(config, train_feature, label, test_feature)
     # lgbm.k_fold_train()
     lgbm.train()
+
 
 def main():
     mmpconfig = Config()
@@ -40,5 +44,4 @@ def main():
 
 if __name__ == '__main__':
     main()
-
 # kaggle competitions submit -c microsoft-malware-prediction -f submission.csv -m "Message"
