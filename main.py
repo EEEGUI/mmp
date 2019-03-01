@@ -4,6 +4,7 @@ from utils.utils import *
 import pandas as pd
 import warnings
 from feature_engineer import feature_engineer_sparse_matrix
+import gc
 
 warnings.filterwarnings('ignore', category=Warning)
 
@@ -31,6 +32,8 @@ def main():
             train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig)
         with timer('Training'):
             train(train_feature, test_feature, label, load_data=False)
+
+        gc.collect()
     # with timer('Training'):
     #     train(None, None, None, True)
 
