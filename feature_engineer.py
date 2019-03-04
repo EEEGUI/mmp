@@ -316,8 +316,8 @@ def feature_engineer_sparse_matrix(config):
     print('Loaded data - ', get_memory_state())
     dataset.generate_feature()
     print('Generated data - ', get_memory_state())
-    dataset.feature_alignment()
-    print('Feature aligned - ', get_memory_state())
+    # dataset.feature_alignment()
+    # print('Feature aligned - ', get_memory_state())
     if mmp_config.MODEL == 'lgbm':
         dataset.one_hot_encoding()
         print('One hot encoded - ', get_memory_state())

@@ -27,8 +27,8 @@ print('Reading test.h5...')
 test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
 train['MachineIdentifier'] = train.index.astype('uint32')
-test['MachineIdentifier']  = test.index.astype('uint32')
-test['HasDetections']=[0]*len(test)
+test['MachineIdentifier'] = test.index.astype('uint32')
+test['HasDetections'] = [0]*len(test)
 
 
 # In[4]:

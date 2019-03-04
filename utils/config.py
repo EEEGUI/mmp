@@ -265,7 +265,7 @@ class Config(object):
                 'norm': True,
                 'batch_norm_decay': 0.9,
                 'hidden_size': [128, 128],
-                'cross_layer_sizes' : [128, 128, 128],
+                'cross_layer_sizes': [128, 128, 128],
                 'k' : 8,
                 'hash_ids' : int(2e5),
                 'batch_size' : 128,  # 1024
