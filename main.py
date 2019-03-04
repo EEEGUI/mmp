@@ -21,7 +21,7 @@ def train(train_feature, test_feature, label, load_data):
     # config.CATEGORY_VARIABLES = [c for c in train_feature.columns if (c not in config.TRUE_NUMERICAL_COLUMNS) & (c.split('_')[0] not in ['cateasnum'])]
     config.CATEGORY_VARIABLES = 'auto'
     print('%d features are used for training...' % (train_feature.shape[1]))
-    model_name = 'xdeep'
+    model_name = 'lgbm'
     if model_name == 'lgbm':
         model = LGBM(config, train_feature, label, test_feature)
     else:

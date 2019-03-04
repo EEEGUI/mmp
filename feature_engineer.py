@@ -189,7 +189,7 @@ class MMPDataSet(dataset.DataSet):
     def one_hot_encoding(self):
         one_hot_num = True  # 对数值型也one_hot
         if one_hot_num:
-            ohe = OneHotEncoder(categories='auto', sparse=False, dtype='uint8').fit(self.df_all)
+            ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
             self.df_all = ohe.transform(self.df_all)
         else:
             ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])
@@ -318,8 +318,9 @@ def feature_engineer_sparse_matrix(config):
     print('Generated data - ', get_memory_state())
     dataset.feature_alignment()
     print('Feature aligned - ', get_memory_state())
-    dataset.one_hot_encoding()
-    print('One hot encoded - ', get_memory_state())
+    if mmp_config.MODEL == 'lgbm':
+        dataset.one_hot_encoding()
+        print('One hot encoded - ', get_memory_state())
     print('%d features are used in train' % dataset.df_all.shape[1])
     print('The length of train is %d' % dataset.len_train)
     print('The length of test is %d' % dataset.len_test)

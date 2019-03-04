@@ -123,15 +123,15 @@ class XDeepfm:
         self.config = config
         self.feature_importance = None
         self.use_sparse_matrix = False if isinstance(train_features, pd.DataFrame) else True
-        self.config.FM_PARAM.update({'feature_nums':self.train_features.shape[1]})
+        self.config.FM_PARAM.update({'feature_nums': self.train_features.shape[1]})
         self.param = tf.contrib.training.HParams(**self.config.FM_PARAM)
 
     def k_fold_train(self):
         k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         test_predictions = np.zeros(self.test_features.shape[0])
         for train_indices, valid_indices in k_fold.split(self.train_features):
-            train_x, train_y = self.train_features[train_indices], self.train_labels.iloc[train_indices, :]
-            valid_x, valid_y = self.train_features[valid_indices], self.train_labels.iloc[valid_indices, :]
+            train_x, train_y = self.train_features.iloc[train_indices, :], self.train_labels.iloc[train_indices, :]
+            valid_x, valid_y = self.train_features.iloc[valid_indices, :], self.train_labels.iloc[valid_indices, :]
 
             model = ctrNet.build_model(self.param)
             model.train(train_data=(train_x, train_y),
