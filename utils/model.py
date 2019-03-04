@@ -9,6 +9,7 @@ from utils.utils import *
 from scipy.sparse import csr_matrix
 import tensorflow as tf
 import ctrNet
+import gc
 from src import misc_utils as utils
 
 
@@ -22,13 +23,16 @@ class LGBM:
         self.use_sparse_matrix = False if isinstance(train_features, pd.DataFrame) else True
 
     def k_fold_train(self, **kwargs):
-        k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
+        if self.config.KFOLD:
+            k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
+        else:
+            k_fold = StratifiedKFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         valid_scores = []
         # train_scores = []
         feature_importance_values = np.zeros(self.train_features.shape[1])
         test_predictions = np.zeros(self.test_features.shape[0])
 
-        for train_indices, valid_indices in k_fold.split(self.train_features):
+        for train_indices, valid_indices in k_fold.split(self.train_features, None if self.config.KFOLD else self.train_labels):
 
             if self.use_sparse_matrix:
                 train_x, train_y = self.train_features[train_indices], self.train_labels.iloc[train_indices, :]
@@ -127,9 +131,13 @@ class XDeepfm:
         self.param = tf.contrib.training.HParams(**self.config.FM_PARAM)
 
     def k_fold_train(self):
-        k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
+        if self.config.KFOLD:
+            k_fold = KFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
+        else:
+            k_fold = StratifiedKFold(n_splits=self.config.N_FOLDS, shuffle=True, random_state=712)
         test_predictions = np.zeros(self.test_features.shape[0])
-        for train_indices, valid_indices in k_fold.split(self.train_features):
+        for train_indices, valid_indices in k_fold.split(self.train_features,
+                                                         None if self.config.KFOLD else self.train_labels):
             train_x, train_y = self.train_features.iloc[train_indices, :], self.train_labels.iloc[train_indices, :]
             valid_x, valid_y = self.train_features.iloc[valid_indices, :], self.train_labels.iloc[valid_indices, :]
 
@@ -141,9 +149,7 @@ class XDeepfm:
             test_predictions = np.add(test_predictions,
                                       rankdata(model.infer(dev_data=(self.test_features, test_predictions)))
                                       / test_predictions.shape[0])
+            del model
+            gc.collect()
 
-            submission(self.config, test_predictions, True, '')
-
-
-
-
+        submission(self.config, test_predictions, True, '')

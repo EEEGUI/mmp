@@ -284,6 +284,7 @@ class Config(object):
     }
 
     MODEL = 'xdeepfm'
+    KFOLD = False
 
 
 
