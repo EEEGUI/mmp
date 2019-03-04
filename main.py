@@ -32,13 +32,18 @@ def train(train_feature, test_feature, label, load_data):
 def main():
     mmpconfig = Config()
     for min_value, max_value in [(0.2, 0.8)]:
+        """
         mmpconfig.MIN = min_value
         mmpconfig.MAX = max_value
         with timer('Feature Engineer'):
             # train_feature, test_feature, label = feature_engineer(save_feature=True)
             train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig, save_data=True)
+        
         with timer('Training'):
-            train(train_feature, test_feature, label, load_data=False)
+            train(train_feature, test_feature, label, load_data=True)
+        """
+        with timer('Training'):
+            train(None, None, None, load_data=True)
 
         gc.collect()
     # with timer('Training'):
