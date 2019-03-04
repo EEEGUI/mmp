@@ -15,6 +15,9 @@ import os
 import gc
 import random
 from utils import config
+import sys
+from utils.log import Logger
+sys.stdout = Logger("log.txt", sys.stdout)
 
 print('Loading Train and Test Data.\n')
 mmp_config = config.Config()
@@ -40,14 +43,14 @@ def make_bucket(data,num=10):
 float_features=['Census_SystemVolumeTotalCapacity','Census_PrimaryDiskTotalCapacity']
 
 for f in float_features:
-    train[f]=train[f].fillna(1e10)
+    train[f] = train[f].fillna(1e10)
     test[f]=test[f].fillna(1e10)
     data=list(train[f])+list(test[f])
     bins=make_bucket(data,num=50)
     train[f]=np.digitize(train[f],bins=bins)
     test[f]=np.digitize(test[f],bins=bins)
     
-train, dev,_,_ = train_test_split(train,train['HasDetections'],test_size=0.02, random_state=2019)
+train, dev, _, _ = train_test_split(train,train['HasDetections'],test_size=0.02, random_state=2019)
 features=train.columns.tolist()[1:-1]
 
 
@@ -64,7 +67,7 @@ hparam=tf.contrib.training.HParams(
             cross_layer_sizes=[128,128,128],
             k=8,
             hash_ids=int(2e5),
-            batch_size=256, # 1024
+            batch_size=1024, # 1024
             optimizer="adam",
             learning_rate=0.001,
             num_display_steps=1000,

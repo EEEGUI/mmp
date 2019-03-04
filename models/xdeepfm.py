@@ -232,8 +232,7 @@ class Model(BaseModel):
         T=(time.time()-start_time)
         self.eval(T,dev_data,hparams,sess)
         os.system("rm -r model_tmp")
-        
-      
+
     def infer(self,dev_data):
         hparams=self.hparams
         sess=self.sess
@@ -253,6 +252,7 @@ class Model(BaseModel):
             preds.append(pred)   
         preds=np.concatenate(preds)
         return preds
+
     def get_embedding(self,dev_data):
         hparams=self.hparams
         sess=self.sess

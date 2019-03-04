@@ -189,7 +189,7 @@ class MMPDataSet(dataset.DataSet):
     def one_hot_encoding(self):
         one_hot_num = True  # 对数值型也one_hot
         if one_hot_num:
-            ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all)
+            ohe = OneHotEncoder(categories='auto', sparse=False, dtype='uint8').fit(self.df_all)
             self.df_all = ohe.transform(self.df_all)
         else:
             ohe = OneHotEncoder(categories='auto', sparse=True, dtype='uint8').fit(self.df_all.loc[:, self.category_variables])

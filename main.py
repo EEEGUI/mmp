@@ -1,5 +1,5 @@
 from utils.config import Config
-from utils.model import LGBM
+from utils.model import LGBM, XDeepfm
 from utils.utils import *
 import pandas as pd
 import warnings
@@ -21,14 +21,18 @@ def train(train_feature, test_feature, label, load_data):
     # config.CATEGORY_VARIABLES = [c for c in train_feature.columns if (c not in config.TRUE_NUMERICAL_COLUMNS) & (c.split('_')[0] not in ['cateasnum'])]
     config.CATEGORY_VARIABLES = 'auto'
     print('%d features are used for training...' % (train_feature.shape[1]))
-    lgbm = LGBM(config, train_feature, label, test_feature)
-    # lgbm.k_fold_train()
-    lgbm.train()
+    model_name = 'xdeep'
+    if model_name == 'lgbm':
+        model = LGBM(config, train_feature, label, test_feature)
+    else:
+        model = XDeepfm(config, train_feature, label, test_feature)
+    model.k_fold_train()
+    # model.train()
 
 
 def main():
     mmpconfig = Config()
-    for min_value, max_value in [(0.2, 0.8), (0.3, 0.8), (0.1, 0.9), (0.2, 0.9)]:
+    for min_value, max_value in [(0.2, 0.8)]:
         mmpconfig.MIN = min_value
         mmpconfig.MAX = max_value
         with timer('Feature Engineer'):
