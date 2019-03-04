@@ -253,7 +253,7 @@ class Config(object):
     N_FOLDS = 5
     MODEL_SAVING_PATH = 'assets/model.pkl'
     SAMPLES_TO_SAVE = 0.2
-    DROP_SAMPLES = True
+    DROP_SAMPLES = False
     MIN = 0.2
     MAX = 0.8
 
@@ -285,8 +285,3 @@ class Config(object):
 
     MODEL = 'xdeepfm'
     KFOLD = False
-
-
-
-
-

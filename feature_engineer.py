@@ -296,7 +296,7 @@ class MMPDataSet(dataset.DataSet):
         self.df_all['Wdft_IsGamer'] = self.df_all['Wdft_IsGamer'].fillna(0)
 
 
-def feature_engineer_sparse_matrix(config):
+def feature_engineer_sparse_matrix(config, save_data=False):
     print('Before load data - ', get_memory_state())
     mmp_config = config
     print('Reading train.h5...')
@@ -326,6 +326,10 @@ def feature_engineer_sparse_matrix(config):
     print('The length of test is %d' % dataset.len_test)
 
     # dataset.reduce_memory_usage()
+    if save_data:
+        dataset.df_all[:dataset.len_train].to_hdf(config.TRAIN_FEATURE_PATH, key='data', format='table')
+        dataset.df_all[dataset.len_train:].to_hdf(config.TEST_FEATURE_PATH, key='data', format='table')
+        dataset.get_label().to_hdf(config.LABEL_PATH, key='data', format='table')
 
     return dataset.df_all[:dataset.len_train], dataset.df_all[dataset.len_train:], dataset.get_label()
 
@@ -376,4 +380,4 @@ if __name__ == '__main__':
     with timer('Feature Engineering '):
         # feature_engineer(save_feature=True)
         mmp_config = config.Config()
-        feature_engineer_sparse_matrix(mmp_config)
+        feature_engineer_sparse_matrix(mmp_config, save_data=True)

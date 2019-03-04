@@ -36,7 +36,7 @@ def main():
         mmpconfig.MAX = max_value
         with timer('Feature Engineer'):
             # train_feature, test_feature, label = feature_engineer(save_feature=True)
-            train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig)
+            train_feature, test_feature, label = feature_engineer_sparse_matrix(mmpconfig, save_data=True)
         with timer('Training'):
             train(train_feature, test_feature, label, load_data=False)
 
