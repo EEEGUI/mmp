@@ -18,8 +18,14 @@ from utils import config
 import sys
 from utils.log import Logger
 from datetime import datetime
+import argparse
 sys.stdout = Logger("log.txt", sys.stdout)
 os.urandom(2019)
+parser = argparse.ArgumentParser(description='Training')
+parser.add_argument('--s', type=str, default='sample', help='use sample data')
+parser.add_argument('--b', type=int, default=128, help='Batch size')
+
+args = parser.parse_args()
 
 
 def generate_feature(df, float_features):
@@ -120,6 +126,14 @@ def generate_feature(df, float_features):
 
 print('Loading Train and Test Data.\n')
 mmp_config = config.Config()
+
+if args.s == 'sample':
+    mmp_config.TRAIN_H5_PATH = 'data/raw/train_sample.h5'
+    mmp_config.TEST_H5_PATH = 'data/raw/test_sample.h5'
+else:
+    mmp_config.TRAIN_H5_PATH = 'data/raw/train.h5'
+    mmp_config.TEST_H5_PATH = 'data/raw/test.h5'
+
 print('Reading train.h5...')
 train = pd.read_hdf(mmp_config.TRAIN_H5_PATH, key='data')
 print('Reading test.h5...')
@@ -172,7 +186,7 @@ hparam=tf.contrib.training.HParams(
             cross_layer_sizes=[128,128,128],
             k=8,
             hash_ids=int(2e5),
-            batch_size=1024, # 1024
+            batch_size=args.b, # 1024
             optimizer="adam",
             learning_rate=0.001,
             num_display_steps=250,
