@@ -19,6 +19,7 @@ import sys
 from utils.log import Logger
 from datetime import datetime
 sys.stdout = Logger("log.txt", sys.stdout)
+os.urandom(2019)
 
 
 def generate_feature(df, float_features):
@@ -198,6 +199,7 @@ for i in range(hparam.kfold):
     if i == hparam.kfold-1:
         tmp=index
     else:
+        random.seed(2019)
         tmp=random.sample(index,int(1.0/hparam.kfold*train.shape[0]))
     index=index-set(tmp)
     print("Number:",len(tmp))
@@ -207,6 +209,7 @@ for i in range(hparam.kfold):
 for i in range(hparam.kfold):
     print("Fold",i)
     dev_index=K_fold[i]
+    random.seed(2019)
     dev_index=random.sample(dev_index,int(0.1*len(dev_index)))
     train_index=[]
     for j in range(hparam.kfold):
