@@ -5,6 +5,7 @@ import pandas as pd
 import warnings
 from feature_engineer import feature_engineer_sparse_matrix
 import gc
+import os
 import sys
 from utils.log import Logger
 sys.stdout = Logger("log.txt", sys.stdout)
@@ -51,5 +52,6 @@ def main():
 
 
 if __name__ == '__main__':
+    # os.environ['CUDA_VISIBLE_DEVICES'] = ""
     main()
 # kaggle competitions submit -c microsoft-malware-prediction -f submission.csv -m "Message"

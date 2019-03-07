@@ -17,7 +17,105 @@ import random
 from utils import config
 import sys
 from utils.log import Logger
+from datetime import datetime
 sys.stdout = Logger("log.txt", sys.stdout)
+
+
+def generate_feature(df, float_features):
+    """
+    生成新特征
+    :return:
+    """
+    # Week
+    first = datetime(2018, 1, 1)
+    datedict2 = {}
+    date_dict = np.load('data/raw/AvSigVersionTimestamps.npy')[()]
+    for x in date_dict: datedict2[x] = (date_dict[x] - first).days // 7
+    df['Week'] = df['AvSigVersion'].map(datedict2)
+    float_features.append('Week')
+
+    df['EngineVersion_2'] = df['EngineVersion'].apply(lambda x: x.split('.')[2]).astype(
+        'category')
+    df['EngineVersion_3'] = df['EngineVersion'].apply(lambda x: x.split('.')[3]).astype(
+        'category')
+
+    df['AppVersion_1'] = df['AppVersion'].apply(lambda x: x.split('.')[1]).astype('category')
+    df['AppVersion_2'] = df['AppVersion'].apply(lambda x: x.split('.')[2]).astype('category')
+    df['AppVersion_3'] = df['AppVersion'].apply(lambda x: x.split('.')[3]).astype('category')
+
+    df['AvSigVersion_0'] = df['AvSigVersion'].apply(lambda x: x.split('.')[0]).astype('category')
+    df['AvSigVersion_1'] = df['AvSigVersion'].apply(lambda x: x.split('.')[1]).astype('category')
+    df['AvSigVersion_2'] = df['AvSigVersion'].apply(lambda x: x.split('.')[2]).astype('category')
+    # self.df_all['OsBuildLab_0'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[0]).astype('category')
+    # self.df_all['OsBuildLab_1'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[1]).astype('category')
+    # self.df_all['OsBuildLab_2'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[2]).astype('category')
+    # self.df_all['OsBuildLab_3'] = self.df_all['OsBuildLab'].astype('str').apply(lambda x: x.split('.')[3]).astype('category')
+    # self.df_all['OsBuildLab_40'] = self.df_all['OsBuildLab'].apply(lambda x: x.split('.')[4].split('-')[0]).astype('category')
+    # self.df_all['OsBuildLab_41'] = self.df_all['OsBuildLab'].apply(lambda x: x.split('.')[4].split('-')[1]).astype('category')
+
+    df['Census_OSVersion_0'] = df['Census_OSVersion'].apply(lambda x: x.split('.')[0]).astype(
+        'category')
+    df['Census_OSVersion_1'] = df['Census_OSVersion'].apply(lambda x: x.split('.')[1]).astype(
+        'category')
+    df['Census_OSVersion_2'] = df['Census_OSVersion'].apply(lambda x: x.split('.')[2]).astype(
+        'category')
+    df['Census_OSVersion_3'] = df['Census_OSVersion'].apply(lambda x: x.split('.')[3]).astype(
+        'category')
+
+    # https://www.kaggle.com/adityaecdrid/simple-feature-engineering-xd
+    df['primary_drive_c_ratio'] = df['Census_SystemVolumeTotalCapacity'] / df[
+        'Census_PrimaryDiskTotalCapacity']
+    float_features += ['primary_drive_c_ratio']
+
+    df['non_primary_drive_MB'] = df['Census_PrimaryDiskTotalCapacity'] - df[
+        'Census_SystemVolumeTotalCapacity']
+    float_features += ['non_primary_drive_MB']
+
+    df['aspect_ratio'] = df['Census_InternalPrimaryDisplayResolutionHorizontal'] / df[
+        'Census_InternalPrimaryDisplayResolutionVertical']
+    float_features += ['aspect_ratio']
+
+    df['monitor_dims'] = df['Census_InternalPrimaryDisplayResolutionHorizontal'].astype(
+        str) + '*' + df['Census_InternalPrimaryDisplayResolutionVertical'].astype('str')
+
+    df['monitor_dims'] = df['monitor_dims'].astype('category')
+
+    df['dpi'] = ((df['Census_InternalPrimaryDisplayResolutionHorizontal'] ** 2 + df[
+        'Census_InternalPrimaryDisplayResolutionVertical'] ** 2) ** .5) / (
+                             df['Census_InternalPrimaryDiagonalDisplaySizeInInches'])
+    float_features += ['dpi']
+
+    df['dpi_square'] = df['dpi'] ** 2
+    float_features += ['dpi_square']
+
+    df['MegaPixels'] = (df['Census_InternalPrimaryDisplayResolutionHorizontal'] * df[
+        'Census_InternalPrimaryDisplayResolutionVertical']) / 1e6
+    float_features += ['MegaPixels']
+
+    df['Screen_Area'] = (df['aspect_ratio'] * (
+            df['Census_InternalPrimaryDiagonalDisplaySizeInInches'] ** 2)) / (
+                                       df['aspect_ratio'] ** 2 + 1)
+    float_features += ['Screen_Area']
+
+    df['ram_per_processor'] = df['Census_TotalPhysicalRAM'] / df[
+        'Census_ProcessorCoreCount']
+    float_features += ['ram_per_processor']
+
+    df['new_num_0'] = df['Census_InternalPrimaryDiagonalDisplaySizeInInches'] / df[
+        'Census_ProcessorCoreCount']
+    float_features += ['new_num_0']
+
+    df['new_num_1'] = df['Census_ProcessorCoreCount'] * df[
+        'Census_InternalPrimaryDiagonalDisplaySizeInInches']
+    float_features += ['new_num_1']
+
+    df['Census_IsFlightingInternal'] = df['Census_IsFlightingInternal'].fillna(1)
+    df['Census_ThresholdOptIn'] = df['Census_ThresholdOptIn'].fillna(1)
+    df['Census_IsWIMBootEnabled'] = df['Census_IsWIMBootEnabled'].fillna(1)
+    df['Wdft_IsGamer'] = df['Wdft_IsGamer'].fillna(0)
+
+    return df, float_features
+
 
 print('Loading Train and Test Data.\n')
 mmp_config = config.Config()
@@ -30,6 +128,12 @@ train['MachineIdentifier'] = train.index.astype('uint32')
 test['MachineIdentifier'] = test.index.astype('uint32')
 test['HasDetections'] = [0]*len(test)
 
+float_features=['Census_SystemVolumeTotalCapacity','Census_PrimaryDiskTotalCapacity']
+
+train, _ = generate_feature(train, float_features)
+test, float_features = generate_feature(test, float_features)
+
+
 
 # In[4]:
 
@@ -40,7 +144,7 @@ def make_bucket(data,num=10):
     for i in range(num):
         bins.append(data[int(len(data)*(i+1)//num)-1])
     return bins
-float_features=['Census_SystemVolumeTotalCapacity','Census_PrimaryDiskTotalCapacity']
+
 
 for f in float_features:
     train[f] = train[f].fillna(1e10)
@@ -51,7 +155,7 @@ for f in float_features:
     test[f]=np.digitize(test[f],bins=bins)
     
 train, dev, _, _ = train_test_split(train,train['HasDetections'],test_size=0.02, random_state=2019)
-features=train.columns.tolist()[1:-1]
+features = list(set(train.columns) - set(['HasDetections', 'MachineIdentifier']))
 
 
 # # Creating hparams
@@ -67,10 +171,10 @@ hparam=tf.contrib.training.HParams(
             cross_layer_sizes=[128,128,128],
             k=8,
             hash_ids=int(2e5),
-            batch_size=1024, # 1024
+            batch_size=128, # 1024
             optimizer="adam",
             learning_rate=0.001,
-            num_display_steps=1000,
+            num_display_steps=250,
             num_eval_steps=1000,
             epoch=1,
             metric='auc',
@@ -126,5 +230,5 @@ for i in range(hparam.kfold):
 submission = pd.read_csv('./data/raw/sample_submission.csv', nrows=len(preds))
 submission['HasDetections'] = preds
 print(submission['HasDetections'].head())
-submission.to_csv('xdeepfm_submission.csv', index=False)
+submission.to_csv('xdeepfm_submission(new_features).csv', index=False)
 

@@ -268,10 +268,10 @@ class Config(object):
                 'cross_layer_sizes': [128, 128, 128],
                 'k' : 8,
                 'hash_ids' : int(2e5),
-                'batch_size' : 128,  # 1024
+                'batch_size' : 2,  # 1024
                 'optimizer' : "adam",
                 'learning_rate' : 0.001,
-                'num_display_steps' : 500,
+                'num_display_steps' : 5,
                 'num_eval_steps' : 1000,
                 'epoch' : 2,
                 'metric' : 'auc',
