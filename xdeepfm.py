@@ -19,6 +19,7 @@ import sys
 from utils.log import Logger
 from datetime import datetime
 import argparse
+
 sys.stdout = Logger("log.txt", sys.stdout)
 os.urandom(2019)
 parser = argparse.ArgumentParser(description='Training')
@@ -89,7 +90,7 @@ def generate_feature(df, float_features):
 
     df['dpi'] = ((df['Census_InternalPrimaryDisplayResolutionHorizontal'] ** 2 + df[
         'Census_InternalPrimaryDisplayResolutionVertical'] ** 2) ** .5) / (
-                             df['Census_InternalPrimaryDiagonalDisplaySizeInInches'])
+                    df['Census_InternalPrimaryDiagonalDisplaySizeInInches'])
     float_features += ['dpi']
 
     df['dpi_square'] = df['dpi'] ** 2
@@ -101,7 +102,7 @@ def generate_feature(df, float_features):
 
     df['Screen_Area'] = (df['aspect_ratio'] * (
             df['Census_InternalPrimaryDiagonalDisplaySizeInInches'] ** 2)) / (
-                                       df['aspect_ratio'] ** 2 + 1)
+                                df['aspect_ratio'] ** 2 + 1)
     float_features += ['Screen_Area']
 
     df['ram_per_processor'] = df['Census_TotalPhysicalRAM'] / df[
@@ -141,104 +142,70 @@ test = pd.read_hdf(mmp_config.TEST_H5_PATH, key='data')
 
 train['MachineIdentifier'] = train.index.astype('uint32')
 test['MachineIdentifier'] = test.index.astype('uint32')
-test['HasDetections'] = [0]*len(test)
+test['HasDetections'] = [0] * len(test)
 
-float_features=['Census_SystemVolumeTotalCapacity','Census_PrimaryDiskTotalCapacity']
+float_features = ['Census_SystemVolumeTotalCapacity', 'Census_PrimaryDiskTotalCapacity']
 
-train, _ = generate_feature(train, float_features)
-test, float_features = generate_feature(test, float_features)
-
+# train, _ = generate_feature(train, float_features)
+# test, float_features = generate_feature(test, float_features)
 
 
 # In[4]:
 
 
-def make_bucket(data,num=10):
+def make_bucket(data, num=10):
     data.sort()
-    bins=[]
+    bins = []
     for i in range(num):
-        bins.append(data[int(len(data)*(i+1)//num)-1])
+        bins.append(data[int(len(data) * (i + 1) // num) - 1])
     return bins
 
 
 for f in float_features:
     train[f] = train[f].fillna(1e10)
-    test[f]=test[f].fillna(1e10)
-    data=list(train[f])+list(test[f])
-    bins=make_bucket(data,num=100)
-    train[f]=np.digitize(train[f],bins=bins)
-    test[f]=np.digitize(test[f],bins=bins)
-    
-train, dev, _, _ = train_test_split(train,train['HasDetections'],test_size=0.02, random_state=2019)
-features = list(set(train.columns) - set(['HasDetections', 'MachineIdentifier']))
+    test[f] = test[f].fillna(1e10)
+    data = list(train[f]) + list(test[f])
+    bins = make_bucket(data, num=100)
+    train[f] = np.digitize(train[f], bins=bins)
+    test[f] = np.digitize(test[f], bins=bins)
 
+# train, dev, _, _ = train_test_split(train, train['HasDetections'], test_size=0.02, random_state=2019)
+features = list(set(train.columns) - set(['HasDetections', 'MachineIdentifier']))
 
 # # Creating hparams
 
 # In[5]:
 
 
-hparam=tf.contrib.training.HParams(
-            model='xdeepfm',
-            norm=True,
-            batch_norm_decay=0.9,
-            hidden_size=[128,128],
-            cross_layer_sizes=[128,128,128],
-            k=8,
-            hash_ids=int(2e5),
-            batch_size=args.b, # 1024
-            optimizer="adam",
-            learning_rate=0.001,
-            num_display_steps=250,
-            num_eval_steps=1000,
-            epoch=1,
-            metric='auc',
-            activation=['relu','relu','relu'],
-            cross_activation='identity',
-            init_method='uniform',
-            init_value=0.1,
-            feature_nums=len(features),
-            kfold=5)
+hparam = tf.contrib.training.HParams(
+    model='xdeepfm',
+    norm=True,
+    batch_norm_decay=0.9,
+    hidden_size=[128, 128],
+    cross_layer_sizes=[128, 128, 128],
+    k=8,
+    hash_ids=int(2e5),
+    batch_size=args.b,  # 1024
+    optimizer="adam",
+    learning_rate=0.001,
+    num_display_steps=250,
+    num_eval_steps=1000,
+    epoch=1,
+    metric='auc',
+    activation=['relu', 'relu', 'relu'],
+    cross_activation='identity',
+    init_method='uniform',
+    init_value=0.1,
+    feature_nums=len(features),
+    kfold=5)
 utils.print_hparams(hparam)
-
 
 # # Training model
 
 # In[6]:
 
 
-index=set(range(train.shape[0]))
-K_fold=[]
-for i in range(hparam.kfold):
-    if i == hparam.kfold-1:
-        tmp=index
-    else:
-        random.seed(2019)
-        tmp=random.sample(index,int(1.0/hparam.kfold*train.shape[0]))
-    index=index-set(tmp)
-    print("Number:",len(tmp))
-    K_fold.append(tmp)
-    
-
-for i in range(hparam.kfold):
-    print("Fold",i)
-    dev_index=K_fold[i]
-    random.seed(2019)
-    dev_index=random.sample(dev_index,int(0.1*len(dev_index)))
-    train_index=[]
-    for j in range(hparam.kfold):
-        if j!=i:
-            train_index+=K_fold[j]
-    model=ctrNet.build_model(hparam)
-    model.train(train_data=(train.iloc[train_index][features],train.iloc[train_index]['HasDetections']),
-                dev_data=(train.iloc[dev_index][features],train.iloc[dev_index]['HasDetections']))
-    print("Training Done! Inference...")
-    if i==0:
-        preds=model.infer(dev_data=(test[features],test['HasDetections']))/hparam.kfold
-    else:
-        preds+=model.infer(dev_data=(test[features],test['HasDetections']))/hparam.kfold
-
-kfold = KFold(n_splits=5, shuffle=True, random_state=712)
+kfold = KFold(n_splits=hparam.kfold, shuffle=True, random_state=712)
 for i, (train_index, dev_index) in enumerate(kfold.split(train)):
     print('Fold', i)
 
@@ -250,7 +217,6 @@ for i, (train_index, dev_index) in enumerate(kfold.split(train)):
         preds = model.infer(dev_data=(test[features], test['HasDetections'])) / hparam.kfold
     else:
         preds += model.infer(dev_data=(test[features], test['HasDetections'])) / hparam.kfold
-
 
 # # Inference
 
