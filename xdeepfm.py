@@ -146,8 +146,8 @@ test['HasDetections'] = [0] * len(test)
 
 float_features = ['Census_SystemVolumeTotalCapacity', 'Census_PrimaryDiskTotalCapacity']
 
-# train, _ = generate_feature(train, float_features)
-# test, float_features = generate_feature(test, float_features)
+train, _ = generate_feature(train, float_features)
+test, float_features = generate_feature(test, float_features)
 
 
 # In[4]:
